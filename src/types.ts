@@ -14,6 +14,9 @@ export interface StreamResult {
   title: string;
   url: string;
   quality?: string;
+  server?: string;
+  latencyMs?: number;
+  sizeText?: string;
   behaviorHints?: {
     notWebReady?: boolean;
     proxyHeaders?: {

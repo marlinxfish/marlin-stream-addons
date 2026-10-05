@@ -1,5 +1,6 @@
 import { config } from '../config';
 import { StreamResult } from '../types';
+import { getRandomUserAgent } from '../utils/http';
 import { BaseResolver } from './base';
 
 export class DataNodesResolver implements BaseResolver {
@@ -17,12 +18,18 @@ export class DataNodesResolver implements BaseResolver {
 
   async resolve(url: string, qualityHint = '1080p'): Promise<StreamResult | null> {
     try {
+      const ua = getRandomUserAgent();
+      const start = performance.now();
       const res = await this.fetchFn(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        headers: {
+          'User-Agent': ua,
+          'Referer': config.oppadramaBaseUrl + '/',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
         signal: AbortSignal.timeout(this.timeoutMs),
       });
+      const latencyMs = Math.round(performance.now() - start);
       if (!res.ok) return null;
-
       const html = await res.text();
       const directMatch = html.match(/href=["'](https?:\/\/[^"']+\.(?:mp4|mkv))["']/i);
       const streamUrl = directMatch ? directMatch[1] : url;
@@ -32,10 +39,13 @@ export class DataNodesResolver implements BaseResolver {
         title: `DataNodes (${qualityHint})`,
         url: streamUrl,
         quality: qualityHint,
+        server: 'DataNodes',
+        latencyMs,
         behaviorHints: {
           proxyHeaders: {
             request: {
               Referer: 'https://datanodes.to/',
+              'User-Agent': ua,
             },
           },
         },

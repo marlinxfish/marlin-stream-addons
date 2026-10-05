@@ -1,6 +1,7 @@
 import { config } from '../../config';
 import { ResolverRegistry } from '../../resolvers/registry';
 import { MediaItemQuery, StreamResult } from '../../types';
+import { getBrowserHeaders } from '../../utils/http';
 import { BaseProvider } from '../base';
 import {
   ExtractedLink,
@@ -39,7 +40,7 @@ export class OppadramaProvider implements BaseProvider {
       const searchUrl = `${this.baseUrl}/?s=${encodeURIComponent(searchQuery)}`;
       const searchRes = await this.fetchFn(searchUrl, {
         signal: AbortSignal.timeout(this.timeoutMs),
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        headers: getBrowserHeaders(this.baseUrl),
       });
       if (!searchRes.ok) return [];
 
@@ -83,7 +84,7 @@ export class OppadramaProvider implements BaseProvider {
       // Fetch detail page
       const detailRes = await this.fetchFn(matchedEntry.url, {
         signal: AbortSignal.timeout(this.timeoutMs),
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        headers: getBrowserHeaders(this.baseUrl),
       });
       if (!detailRes.ok) return [];
 
@@ -99,7 +100,7 @@ export class OppadramaProvider implements BaseProvider {
 
         const epRes = await this.fetchFn(episodeUrl, {
           signal: AbortSignal.timeout(this.timeoutMs),
-          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+          headers: getBrowserHeaders(this.baseUrl),
         });
         if (!epRes.ok) return [];
         detailHtml = await epRes.text();
@@ -110,7 +111,7 @@ export class OppadramaProvider implements BaseProvider {
         if (movieWatchUrl && movieWatchUrl !== matchedEntry.url) {
           const movieRes = await this.fetchFn(movieWatchUrl, {
             signal: AbortSignal.timeout(this.timeoutMs),
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+            headers: getBrowserHeaders(this.baseUrl),
           });
           if (movieRes.ok) {
             const movieHtml = await movieRes.text();
@@ -126,10 +127,23 @@ export class OppadramaProvider implements BaseProvider {
       const resolvePromises = extractedLinks.map(async (link) => {
         const resolved = await this.resolverRegistry.resolve(link.url, link.quality);
         if (resolved) {
+          const quality = resolved.quality || link.quality || 'HD';
+          const server = resolved.server || link.server || 'Server';
+          const speedText = resolved.latencyMs !== undefined ? ` • 🚀 ${resolved.latencyMs}ms` : '';
+          const sizeText = resolved.sizeText ? ` • 💾 ${resolved.sizeText}` : '';
+
+          const isSeries = query.type === 'series' && query.season !== undefined && query.episode !== undefined;
+          const headerLine = isSeries
+            ? `📡 ${query.title}${query.year ? ` (${query.year})` : ''} • S${String(query.season).padStart(2, '0')}E${String(query.episode).padStart(2, '0')}`
+            : `🎬 ${query.title}${query.year ? ` (${query.year})` : ''}`;
+
+          const displayTitle = `${headerLine}\n⚡ ${server} • 💾 ${quality}${sizeText}${speedText} • 🇮🇩 Sub Indo`;
+          const displayName = `${config.addonIcon}\n${config.addonName}\n${quality}`;
+
           return {
             ...resolved,
-            name: `[Oppadrama] ${resolved.name}`,
-            title: `${query.title}${query.year ? ` (${query.year})` : ''} - ${resolved.title}`,
+            name: displayName,
+            title: displayTitle,
           };
         }
         return null;

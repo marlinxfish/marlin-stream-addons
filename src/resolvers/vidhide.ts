@@ -1,5 +1,6 @@
 import { config } from '../config';
 import { StreamResult } from '../types';
+import { getRandomUserAgent } from '../utils/http';
 import { BaseResolver } from './base';
 
 export class VidhideResolver implements BaseResolver {
@@ -27,25 +28,28 @@ export class VidhideResolver implements BaseResolver {
         targetUrl = targetUrl.replace('/d/', '/v/');
       }
 
+      const ua = getRandomUserAgent();
+      const start = performance.now();
       const res = await this.fetchFn(targetUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'User-Agent': ua,
           'Referer': config.oppadramaBaseUrl + '/',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         },
         signal: AbortSignal.timeout(this.timeoutMs),
       });
+      const latencyMs = Math.round(performance.now() - start);
       if (!res.ok) return null;
-
       const html = await res.text();
       let streamUrl: string | null = null;
 
       // Check Dean Edwards packer
       const marker = 'eval(function(p,a,c,k,e,d)';
-      const start = html.indexOf(marker);
-      if (start !== -1) {
-        const end = html.indexOf(".split('|')))", start);
+      const markerStart = html.indexOf(marker);
+      if (markerStart !== -1) {
+        const end = html.indexOf(".split('|')))", markerStart);
         if (end !== -1) {
-          const block = html.slice(start, end + 13);
+          const block = html.slice(markerStart, end + 13);
           try {
             const fn = new Function(block.replace(/^eval/, 'return'));
             const unpacked = fn();
@@ -77,11 +81,13 @@ export class VidhideResolver implements BaseResolver {
         title: `${serverLabel} (${qualityHint})`,
         url: streamUrl,
         quality: qualityHint,
+        server: serverLabel,
+        latencyMs,
         behaviorHints: {
           proxyHeaders: {
             request: {
               Referer: `${origin}/`,
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+              'User-Agent': ua,
             },
           },
         },
