@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { addonBuilder } from '../src/addon';
+import { resolveStreams } from '../src/addon';
 import { cacheService } from '../src/services/cache';
 import { decodeConfigParam, filterStreamsByConfig } from '../src/services/config-filter';
 import type { StreamResult } from '../src/types';
@@ -72,11 +72,10 @@ describe('Config Filter Service in Backend', () => {
     };
     const encoded = Buffer.from(JSON.stringify(configPayload)).toString('base64url');
 
-    const addonInterface = addonBuilder.getInterface();
-    const res = await addonInterface.get('stream', 'movie', 'tt_filter_test', {}, encoded);
-    expect(res.streams).toHaveLength(1);
-    expect(res.streams[0].server).toBe('FileLions');
-    expect(res.streams[0].quality).toBe('720p');
+    const streams = await resolveStreams({ type: 'movie', id: 'tt_filter_test', config: encoded });
+    expect(streams).toHaveLength(1);
+    expect(streams[0].server).toBe('FileLions');
+    expect(streams[0].quality).toBe('720p');
   });
   it('strips speed and size from title when showSpeed or showSize is false', () => {
     const rawStreams: StreamResult[] = [

@@ -1,5 +1,3 @@
-// @ts-expect-error stremio-addon-sdk untyped import in bun
-import { addonBuilder } from 'stremio-addon-sdk';
 import { config } from './config';
 import { OppadramaProvider } from './providers/oppadrama';
 import { ProviderRegistry } from './providers/registry';
@@ -22,7 +20,6 @@ export const manifest = {
   },
 };
 
-export const builder = new addonBuilder(manifest);
 
 // Setup Provider Registry
 export const providerRegistry = new ProviderRegistry();
@@ -58,10 +55,3 @@ export async function resolveStreams({
     return [];
   }
 }
-
-builder.defineStreamHandler(async ({ type, id, config: rawConfig }: { type: MediaType; id: string; config?: string }) => {
-  const streams = await resolveStreams({ type, id, config: rawConfig });
-  return { streams };
-});
-
-export { builder as addonBuilder };
