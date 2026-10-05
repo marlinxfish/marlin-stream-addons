@@ -54,4 +54,24 @@ describe('CinemetaService', () => {
     expect(result?.season).toBe(1);
     expect(result?.episode).toBe(2);
   });
+
+  it('handles non-numeric season and episode gracefully without NaN', async () => {
+    const mockFetch = mock(async () => {
+      return new Response(JSON.stringify({
+        meta: {
+          id: 'tt12345',
+          name: 'Shadow Punisher',
+          type: 'series',
+          year: '2024'
+        }
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    });
+
+    const service = new CinemetaService(mockFetch as unknown as typeof fetch);
+    const result = await service.lookup('series', 'tt12345:abc:xyz');
+
+    expect(result).not.toBeNull();
+    expect(result?.season).toBeUndefined();
+    expect(result?.episode).toBeUndefined();
+  });
 });

@@ -11,8 +11,10 @@ export class CinemetaService {
     try {
       const parts = id.split(':');
       const imdbId = parts[0];
-      const season = parts[1] ? Number(parts[1]) : undefined;
-      const episode = parts[2] ? Number(parts[2]) : undefined;
+      const seasonNum = parts[1] ? Number(parts[1]) : undefined;
+      const episodeNum = parts[2] ? Number(parts[2]) : undefined;
+      const season = seasonNum !== undefined && !Number.isNaN(seasonNum) ? seasonNum : undefined;
+      const episode = episodeNum !== undefined && !Number.isNaN(episodeNum) ? episodeNum : undefined;
 
       const url = `https://v3-cinemeta.strem.io/meta/${type}/${imdbId}.json`;
       const res = await this.fetchFn(url, { signal: AbortSignal.timeout(6000) });
