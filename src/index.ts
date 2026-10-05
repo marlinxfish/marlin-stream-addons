@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { manifest, resolveStreams } from './addon';
 import { config } from './config';
+import { cacheService } from './services/cache';
 import type { MediaType } from './types';
 
 export const app = new Hono();
@@ -38,6 +39,13 @@ app.get('/stream/:type/:id', async (c) => {
   const type = c.req.param('type') as MediaType;
   const rawId = c.req.param('id');
   const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
+
+  if (config.cacheStreamTtl <= 0) {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  } else {
+    c.header('Cache-Control', `max-age=${config.cacheStreamTtl}, public`);
+  }
+
   const streams = await resolveStreams({ type, id });
   return c.json({ streams });
 });
@@ -47,8 +55,21 @@ app.get('/:config/stream/:type/:id', async (c) => {
   const type = c.req.param('type') as MediaType;
   const rawId = c.req.param('id');
   const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
+
+  if (config.cacheStreamTtl <= 0) {
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  } else {
+    c.header('Cache-Control', `max-age=${config.cacheStreamTtl}, public`);
+  }
+
   const streams = await resolveStreams({ type, id, config: configParam });
   return c.json({ streams });
+});
+
+// Route: Cache Clear
+app.get('/cache/clear', (c) => {
+  cacheService.clear();
+  return c.json({ status: 'ok', message: 'In-memory cache purged successfully' });
 });
 
 // Route: Configure
