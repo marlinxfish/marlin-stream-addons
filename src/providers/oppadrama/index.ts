@@ -1,7 +1,7 @@
 import { ResolverRegistry } from '../../resolvers/registry';
 import { MediaItemQuery, StreamResult } from '../../types';
 import { BaseProvider } from '../base';
-import { parseDownloadLinks, parseSearchResults } from './parser';
+import { parseDownloadLinks, parseEpisodeUrl, parseSearchResults } from './parser';
 
 export class OppadramaProvider implements BaseProvider {
   readonly name = 'Oppadrama';
@@ -48,9 +48,22 @@ export class OppadramaProvider implements BaseProvider {
       });
       if (!detailRes.ok) return [];
 
-      const detailHtml = await detailRes.text();
-      const extractedLinks = parseDownloadLinks(detailHtml);
+      let detailHtml = await detailRes.text();
+      let extractedLinks = parseDownloadLinks(detailHtml);
 
+      if (extractedLinks.length === 0) {
+        const episodeUrl = parseEpisodeUrl(detailHtml, query.episode);
+        if (episodeUrl) {
+          const epRes = await this.fetchFn(episodeUrl, {
+            signal: AbortSignal.timeout(6000),
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+          });
+          if (epRes.ok) {
+            detailHtml = await epRes.text();
+            extractedLinks = parseDownloadLinks(detailHtml);
+          }
+        }
+      }
       // Resolve links concurrently with Promise.allSettled
       const resolvePromises = extractedLinks.map(async (link) => {
         const resolved = await this.resolverRegistry.resolve(link.url, link.quality);

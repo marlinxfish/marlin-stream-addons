@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { BaseProvider } from '../src/providers/base';
 import { OppadramaProvider } from '../src/providers/oppadrama';
-import { parseDownloadLinks, parseSearchResults } from '../src/providers/oppadrama/parser';
+import { parseDownloadLinks, parseEpisodeUrl, parseSearchResults } from '../src/providers/oppadrama/parser';
 import { ProviderRegistry } from '../src/providers/registry';
 import { ResolverRegistry } from '../src/resolvers/registry';
 import { MediaItemQuery, StreamResult } from '../src/types';
@@ -26,6 +26,20 @@ describe('Oppadrama HTML Parser', () => {
     expect(links[0].server).toBe('Buzzheavier');
     expect(links[0].quality).toBe('1080p');
     expect(links[0].url).toBe('https://buzzheavier.com/lu8y76xr0cb6');
+  });
+
+  it('extracts episode or movie link from eplister/epcheck', () => {
+    const html = `
+      <div class="eplister">
+        <ul>
+          <li><a href="http://example.com/ep2"><span class="epl-num">2</span><span class="epl-title">Episode 2</span></a></li>
+          <li><a href="http://example.com/ep1"><span class="epl-num">1</span><span class="epl-title">Episode 1</span></a></li>
+        </ul>
+      </div>
+    `;
+    expect(parseEpisodeUrl(html)).toBe('http://example.com/ep2');
+    expect(parseEpisodeUrl(html, 1)).toBe('http://example.com/ep1');
+    expect(parseEpisodeUrl('<div>none</div>')).toBeNull();
   });
 });
 

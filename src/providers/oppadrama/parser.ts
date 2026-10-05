@@ -58,3 +58,25 @@ export function parseDownloadLinks(html: string): ExtractedLink[] {
 
   return links;
 }
+
+export function parseEpisodeUrl(html: string, episodeNum?: number): string | null {
+  const $ = cheerio.load(html);
+  const items = $('.eplister li a, .epcheck li a');
+  if (items.length === 0) return null;
+
+  if (episodeNum !== undefined) {
+    let matched: string | null = null;
+    items.each((_, el) => {
+      const numText = $(el).find('.epl-num').text().trim();
+      const titleText = $(el).find('.epl-title').text().trim();
+      const num = parseInt(numText, 10);
+      if (num === episodeNum || titleText.includes(`Episode ${episodeNum}`)) {
+        matched = $(el).attr('href') || null;
+        return false;
+      }
+    });
+    if (matched) return matched;
+  }
+
+  return items.first().attr('href') || null;
+}

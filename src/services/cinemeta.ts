@@ -18,11 +18,24 @@ export class CinemetaService {
 
       const url = `https://v3-cinemeta.strem.io/meta/${type}/${imdbId}.json`;
       const res = await this.fetchFn(url, { signal: AbortSignal.timeout(6000) });
-      if (!res.ok) return null;
+      let data: { meta?: { name?: string; year?: string | number } } | null = null;
+      if (res.ok) {
+        data = (await res.json()) as { meta?: { name?: string; year?: string | number } };
+      }
 
-      const data = (await res.json()) as { meta?: { name?: string; year?: string | number } };
+      const ID_ALIASES: Record<string, string> = {
+        tt33555239: 'tt37853455', // One Night Only (2026) IMDb renumbering
+      };
+
+      if (!data?.meta?.name && ID_ALIASES[imdbId]) {
+        const aliasUrl = `https://v3-cinemeta.strem.io/meta/${type}/${ID_ALIASES[imdbId]}.json`;
+        const aliasRes = await this.fetchFn(aliasUrl, { signal: AbortSignal.timeout(6000) });
+        if (aliasRes.ok) {
+          data = (await aliasRes.json()) as { meta?: { name?: string; year?: string | number } };
+        }
+      }
+
       if (!data?.meta?.name) return null;
-
       const yearRaw = data.meta.year;
       const year = typeof yearRaw === 'number' ? yearRaw : yearRaw ? parseInt(String(yearRaw), 10) : undefined;
 
