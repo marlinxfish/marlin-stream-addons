@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "marlin-stream-addons",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-02-14",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "OPPADRAMA_BASE_URL": "http://212.86.121.175",
+    "ADDON_NAME": "Marlin Stream",
+    "ADDON_ICON": "🐟",
+    "REQUEST_TIMEOUT_MS": "6000",
+    "CACHE_STREAM_TTL": "3600",
+    "CACHE_META_TTL": "86400"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

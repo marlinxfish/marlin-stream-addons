@@ -33,57 +33,20 @@ describe('Stremio Addon Definition', () => {
     expect(res.streams[0].name).toBe('FastCDN');
     expect(res.streams[0].url).toBe('https://cdn.example.com/movie.mp4');
   });
-  it('serves manifest and stream through configured express routes', async () => {
-    interface FakeResponse {
-      status: number;
-      body: unknown;
-    }
-
-    const manifestRes = await new Promise<FakeResponse>((resolve) => {
-      let statusCode = 200;
-      const fakeRes = {
-        setHeader: () => {},
-        status: (code: number) => {
-          statusCode = code;
-          return fakeRes;
-        },
-        json: (data: unknown) => resolve({ status: statusCode, body: data }),
-        end: (data: unknown) => resolve({ status: statusCode, body: data }),
-      } as unknown as Response;
-      const fakeReq = {
-        method: 'GET',
-        url: '/someconfig/manifest.json',
-        headers: {},
-      } as unknown as Request;
-      app.handle(fakeReq, fakeRes);
-    });
-
-    const manifestData = manifestRes.body as { id?: string };
+  it('serves manifest and stream through configured Hono routes', async () => {
+    const manifestRes = await app.request('/someconfig/manifest.json');
+    expect(manifestRes.status).toBe(200);
+    const manifestData = await manifestRes.json();
     expect(manifestData.id).toBe('community.movieaddons.stream');
 
     // Test stream endpoint
     cacheService.setStream('stream:movie:tt_route_test', [
       { name: 'TestServer', title: 'Route Test Stream', url: 'https://test.com/stream.mp4' },
     ]);
-    const streamRes = await new Promise<FakeResponse>((resolve) => {
-      let statusCode = 200;
-      const fakeRes = {
-        setHeader: () => {},
-        status: (code: number) => {
-          statusCode = code;
-          return fakeRes;
-        },
-        json: (data: unknown) => resolve({ status: statusCode, body: data }),
-      } as unknown as Response;
-      const fakeReq = {
-        method: 'GET',
-        url: '/someconfig/stream/movie/tt_route_test.json',
-        headers: {},
-      } as unknown as Request;
-      app.handle(fakeReq, fakeRes);
-    });
 
-    const streamData = streamRes.body as { streams?: Array<{ name?: string }> };
+    const streamRes = await app.request('/someconfig/stream/movie/tt_route_test.json');
+    expect(streamRes.status).toBe(200);
+    const streamData = await streamRes.json();
     expect(streamData.streams).toHaveLength(1);
     expect(streamData.streams?.[0]?.name).toBe('TestServer');
   });

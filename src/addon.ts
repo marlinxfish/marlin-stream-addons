@@ -8,7 +8,7 @@ import { cacheService } from './services/cache';
 import { cinemetaService } from './services/cinemeta';
 import type { MediaType, StreamResult } from './types';
 import { decodeConfigParam, filterStreamsByConfig } from './services/config-filter';
-const manifest = {
+export const manifest = {
   id: 'community.movieaddons.stream',
   version: '1.0.0',
   name: 'Marlin Stream Addons',
@@ -17,6 +17,9 @@ const manifest = {
   types: ['movie', 'series'],
   catalogs: [],
   idPrefixes: ['tt'],
+  behaviorHints: {
+    configurable: true,
+  },
 };
 
 export const builder = new addonBuilder(manifest);
@@ -25,7 +28,15 @@ export const builder = new addonBuilder(manifest);
 export const providerRegistry = new ProviderRegistry();
 providerRegistry.register(new OppadramaProvider(config.oppadramaBaseUrl, defaultResolverRegistry));
 
-builder.defineStreamHandler(async ({ type, id, config: rawConfig }: { type: MediaType; id: string; config?: string }) => {
+export async function resolveStreams({
+  type,
+  id,
+  config: rawConfig,
+}: {
+  type: MediaType;
+  id: string;
+  config?: string;
+}): Promise<StreamResult[]> {
   try {
     const userConfig = decodeConfigParam(rawConfig);
     const cacheKey = `stream:${type}:${id}`;
@@ -33,7 +44,7 @@ builder.defineStreamHandler(async ({ type, id, config: rawConfig }: { type: Medi
 
     if (!streams) {
       const meta = await cinemetaService.lookup(type, id);
-      if (!meta) return { streams: [] };
+      if (!meta) return [];
 
       streams = await providerRegistry.getAllStreams(meta);
       if (streams.length > 0) {
@@ -41,11 +52,16 @@ builder.defineStreamHandler(async ({ type, id, config: rawConfig }: { type: Medi
       }
     }
 
-    return { streams: filterStreamsByConfig(streams, userConfig) };
+    return filterStreamsByConfig(streams, userConfig);
   } catch (err) {
     console.error(`[StreamHandler] Error processing ${type}/${id}:`, err);
-    return { streams: [] };
+    return [];
   }
+}
+
+builder.defineStreamHandler(async ({ type, id, config: rawConfig }: { type: MediaType; id: string; config?: string }) => {
+  const streams = await resolveStreams({ type, id, config: rawConfig });
+  return { streams };
 });
 
 export { builder as addonBuilder };
