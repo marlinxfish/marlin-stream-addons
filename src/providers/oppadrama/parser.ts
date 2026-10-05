@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 export interface SearchEntry {
   title: string;
   url: string;
+  type?: 'movie' | 'series';
 }
 
 export interface ExtractedLink {
@@ -19,8 +20,17 @@ export function parseSearchResults(html: string): SearchEntry[] {
     const linkEl = $(el).find('a').first();
     const title = $(el).find('.title, h2, h3').text().trim() || linkEl.text().trim();
     const url = linkEl.attr('href') || '';
+    const typeText = $(el).find('.typez').text().trim().toLowerCase();
+
+    let type: 'movie' | 'series' | undefined;
+    if (typeText.includes('movie')) {
+      type = 'movie';
+    } else if (typeText.includes('drama') || typeText.includes('tv show') || typeText.includes('anime')) {
+      type = 'series';
+    }
+
     if (url && title) {
-      results.push({ title, url });
+      results.push({ title, url, type });
     }
   });
 
@@ -88,14 +98,32 @@ export function parseEpisodeUrl(html: string, episodeNum?: number): string | nul
     items.each((_, el) => {
       const numText = $(el).find('.epl-num').text().trim();
       const titleText = $(el).find('.epl-title').text().trim();
+      const href = $(el).attr('href') || '';
       const num = parseInt(numText, 10);
-      if (num === episodeNum || titleText.includes(`Episode ${episodeNum}`)) {
-        matched = $(el).attr('href') || null;
+
+      const epInTitle = titleText.match(/episode\s*(\d+)/i);
+      const epInHref = href.match(/-episode-(\d+)/i);
+      const parsedNum = !isNaN(num)
+        ? num
+        : epInTitle
+        ? parseInt(epInTitle[1], 10)
+        : epInHref
+        ? parseInt(epInHref[1], 10)
+        : NaN;
+
+      if (parsedNum === episodeNum) {
+        matched = href;
         return false;
       }
     });
-    if (matched) return matched;
+    return matched;
   }
 
   return items.first().attr('href') || null;
+}
+
+export function parseMovieWatchUrl(html: string): string | null {
+  const $ = cheerio.load(html);
+  const movieReleaseLink = $('.eplister li a, .epcheck li a').first().attr('href');
+  return movieReleaseLink || null;
 }

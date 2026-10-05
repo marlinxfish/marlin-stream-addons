@@ -39,6 +39,7 @@ describe('Oppadrama HTML Parser', () => {
     `;
     expect(parseEpisodeUrl(html)).toBe('http://example.com/ep2');
     expect(parseEpisodeUrl(html, 1)).toBe('http://example.com/ep1');
+    expect(parseEpisodeUrl(html, 99)).toBeNull();
     expect(parseEpisodeUrl('<div>none</div>')).toBeNull();
   });
 });
@@ -134,6 +135,50 @@ describe('OppadramaProvider', () => {
 
     expect(streams.length).toBe(1);
     expect(streams[0].url).toBe('https://buzzheavier.com/ep2_link');
+  });
+
+  it('returns empty array when requested episode is not found (anti-mismatch guard)', async () => {
+    const searchHtml = `<div class="result-item"><article><a href="http://212.86.121.175/show/"><span class="title">Test Show</span></a></article></div>`;
+    const containerHtml = `
+      <div class="eplister">
+        <ul>
+          <li><a href="http://example.com/ep1"><span class="epl-num">1</span></a></li>
+        </ul>
+      </div>
+      <ul><li><strong>Buzzheavier</strong><span>1080p</span><a href="https://buzzheavier.com/fallback">Download</a></li></ul>
+    `;
+
+    const mockFetch = mock(async (url: string | URL | Request) => {
+      const urlStr = url.toString();
+      if (urlStr.includes('/?s=')) return new Response(searchHtml, { status: 200 });
+      return new Response(containerHtml, { status: 200 });
+    });
+
+    const registry = new ResolverRegistry();
+    const provider = new OppadramaProvider('http://212.86.121.175', registry, mockFetch as unknown as typeof fetch);
+    const streams = await provider.getStreams({
+      imdbId: 'tt9999999',
+      type: 'series',
+      title: 'Test Show',
+      season: 1,
+      episode: 50, // Does not exist
+    });
+
+    // Must be empty array, NOT fallback link!
+    expect(streams.length).toBe(0);
+  });
+
+  it('filters candidate search entries by matching type (movie vs series)', async () => {
+    const searchHtml = `
+      <div class="listupd">
+        <article class="bs"><div class="bsx"><a href="http://example.com/drama-show/"><div class="typez Drama">Drama</div><div class="tt">Drakor Title</div></a></div></article>
+        <article class="bs"><div class="bsx"><a href="http://example.com/movie-film/"><div class="typez Movie">Movie</div><div class="tt">Movie Title</div></a></div></article>
+      </div>
+    `;
+    const entries = parseSearchResults(searchHtml);
+    expect(entries.length).toBe(2);
+    expect(entries[0].type).toBe('series');
+    expect(entries[1].type).toBe('movie');
   });
 });
 
