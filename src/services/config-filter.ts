@@ -60,7 +60,7 @@ export function filterStreamsByConfig(
           title = title.replace(/ • 🚀 \d+ms/g, '');
         }
         if (config.showSize === false) {
-          title = title.replace(/ • 💾 [^•]+?(?= •|$)/g, '');
+          title = title.replace(/ • (?:📦|💾) [^•\n]+?(?= •|$)/g, '');
         }
       }
       return { ...stream, title };

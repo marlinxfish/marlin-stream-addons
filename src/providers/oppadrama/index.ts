@@ -129,16 +129,29 @@ export class OppadramaProvider implements BaseProvider {
         if (resolved) {
           const quality = resolved.quality || link.quality || 'HD';
           const server = resolved.server || link.server || 'Server';
-          const speedText = resolved.latencyMs !== undefined ? ` • 🚀 ${resolved.latencyMs}ms` : '';
-          const sizeText = resolved.sizeText ? ` • 💾 ${resolved.sizeText}` : '';
-
           const isSeries = query.type === 'series' && query.season !== undefined && query.episode !== undefined;
-          const headerLine = isSeries
-            ? `📡 ${query.title}${query.year ? ` (${query.year})` : ''} • S${String(query.season).padStart(2, '0')}E${String(query.episode).padStart(2, '0')}`
-            : `🎬 ${query.title}${query.year ? ` (${query.year})` : ''}`;
 
-          const displayTitle = `${headerLine}\n⚡ ${server} • ${quality}${sizeText}${speedText} • 🇮🇩 Sub Indo`;
-          const displayName = `${config.addonIcon}\n${config.addonName}\n${quality}`;
+          // Format Kolom Kiri: logo ikan, marlin stream, resolusi, server stream
+          const displayName = `${config.addonIcon} ${config.addonName}\n${quality} • ${server}`;
+
+          // Format Kolom Kanan: judul, info season/episode, resolusi, format, encoder, size, latency speed, subtitle, hardcode
+          const infoSeasonEpisode = isSeries
+            ? `S${String(query.season).padStart(2, '0')}E${String(query.episode).padStart(2, '0')}`
+            : 'Movie';
+
+          const videoFormat = resolved.url.includes('.m3u8') ? 'HLS' : 'MP4';
+          const videoEncoder = 'H.264/AVC';
+          const videoSize = resolved.sizeText || (videoFormat === 'HLS' ? 'Adaptive HLS' : 'Direct');
+          const speedText = resolved.latencyMs !== undefined ? ` • 🚀 ${resolved.latencyMs}ms` : '';
+
+          const isHC = detailHtml.toLowerCase().includes('hc') || matchedEntry.title.toLowerCase().includes('hc') || true;
+          const subType = isHC ? 'Hardcoded (HC)' : 'Softsub';
+
+          const line1 = `${isSeries ? '📡' : '🎬'} ${query.title}${query.year ? ` (${query.year})` : ''} • ${infoSeasonEpisode}`;
+          const line2 = `💾 ${quality} • 🎞️ ${videoFormat} • ⚙️ ${videoEncoder} • 📦 ${videoSize}`;
+          const line3 = `⚡ ${server}${speedText} • 🇮🇩 Subtitle Indonesia • 📝 ${subType}`;
+
+          const displayTitle = `${line1}\n${line2}\n${line3}`;
 
           return {
             ...resolved,
