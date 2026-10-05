@@ -26,7 +26,7 @@ export class OppadramaProvider implements BaseProvider {
   ) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.resolverRegistry = resolverRegistry;
-    this.fetchFn = fetchFn;
+    this.fetchFn = (input, init) => fetchFn(input, init);
     this.timeoutMs = timeoutMs;
   }
 
@@ -171,7 +171,8 @@ export class OppadramaProvider implements BaseProvider {
       }
 
       return results;
-    } catch {
+    } catch (err) {
+      console.error('[Oppadrama] getStreams caught error:', err);
       return [];
     }
   }

@@ -33,6 +33,7 @@ export class CatalogService {
   }
 
   async getCatalog(type: MediaType, searchQuery?: string): Promise<CatalogMetaItem[]> {
+    if (!config.oppadramaEnabled) return [];
     try {
       let targetUrl = '';
       if (searchQuery && searchQuery.trim()) {
@@ -85,6 +86,7 @@ export class CatalogService {
   }
 
   async getMeta(type: MediaType, id: string): Promise<FullMetaDetail | null> {
+    if (!config.oppadramaEnabled) return null;
     try {
       if (!id.startsWith('oppa:')) return null;
       const slug = id.slice(5);

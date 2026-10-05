@@ -21,4 +21,10 @@ describe('Config Module', () => {
     expect(conf.port).toBe(8080);
     expect(conf.requestTimeoutMs).toBe(8000);
   });
+
+  it('enables providers by default and disables only on explicit "false"', () => {
+    expect(loadConfig({}).oppadramaEnabled).toBe(true);
+    expect(loadConfig({ PROVIDER_OPPADRAMA_ENABLED: 'true' }).oppadramaEnabled).toBe(true);
+    expect(loadConfig({ PROVIDER_OPPADRAMA_ENABLED: 'false' }).oppadramaEnabled).toBe(false);
+  });
 });

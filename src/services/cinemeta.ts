@@ -6,7 +6,7 @@ export class CinemetaService {
   private timeoutMs: number;
 
   constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
-    this.fetchFn = fetchFn;
+    this.fetchFn = (input, init) => fetchFn(input, init);
     this.timeoutMs = timeoutMs;
   }
 
@@ -75,7 +75,8 @@ export class CinemetaService {
         season,
         episode,
       };
-    } catch {
+    } catch (err) {
+      console.error('[cinemeta] caught error:', err);
       return null;
     }
   }

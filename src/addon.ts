@@ -44,7 +44,9 @@ export const manifest = {
 
 // Setup Provider Registry
 export const providerRegistry = new ProviderRegistry();
-providerRegistry.register(new OppadramaProvider(config.oppadramaBaseUrl, defaultResolverRegistry));
+if (config.oppadramaEnabled) {
+  providerRegistry.register(new OppadramaProvider(config.oppadramaBaseUrl, defaultResolverRegistry));
+}
 
 export async function resolveStreams({
   type,
@@ -58,10 +60,11 @@ export async function resolveStreams({
   try {
     const userConfig = decodeConfigParam(rawConfig);
     const cacheKey = `stream:${type}:${id}`;
-    let streams = cacheService.getStream(cacheKey);
+    let streams: StreamResult[] = cacheService.getStream(cacheKey) || [];
 
     if (!streams || streams.length === 0) {
       if (id.startsWith('oppa:')) {
+        if (!config.oppadramaEnabled) return [];
         const slug = id.slice(5);
         const targetUrl = `${config.oppadramaBaseUrl}/${slug}/`;
         const res = await safeFetch(targetUrl);
@@ -119,7 +122,7 @@ export async function resolveStreams({
       }
     }
 
-    return filterStreamsByConfig(streams, userConfig);
+    return filterStreamsByConfig(streams || [], userConfig);
   } catch (err) {
     console.error(`[StreamHandler] Error processing ${type}/${id}:`, err);
     return [];

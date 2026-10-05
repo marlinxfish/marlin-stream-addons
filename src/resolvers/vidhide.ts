@@ -9,7 +9,7 @@ export class VidhideResolver implements BaseResolver {
   private timeoutMs: number;
 
   constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
-    this.fetchFn = fetchFn;
+    this.fetchFn = (input, init) => fetchFn(input, init);
     this.timeoutMs = timeoutMs;
   }
   canResolve(url: string): boolean {
