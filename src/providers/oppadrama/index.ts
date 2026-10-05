@@ -1,7 +1,7 @@
 import { config } from '../../config';
 import { ResolverRegistry } from '../../resolvers/registry';
 import { MediaItemQuery, StreamResult } from '../../types';
-import { getBrowserHeaders } from '../../utils/http';
+import { getBrowserHeaders, safeFetch } from '../../utils/http';
 import { BaseProvider } from '../base';
 import {
   ExtractedLink,
@@ -21,7 +21,7 @@ export class OppadramaProvider implements BaseProvider {
   constructor(
     baseUrl: string,
     resolverRegistry: ResolverRegistry,
-    fetchFn: typeof fetch = fetch,
+    fetchFn: typeof fetch = safeFetch,
     timeoutMs: number = config.requestTimeoutMs
   ) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');

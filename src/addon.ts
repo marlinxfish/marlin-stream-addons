@@ -39,12 +39,12 @@ export async function resolveStreams({
     const cacheKey = `stream:${type}:${id}`;
     let streams = cacheService.getStream(cacheKey);
 
-    if (!streams) {
+    if (!streams || streams.length === 0) {
       const meta = await cinemetaService.lookup(type, id);
       if (!meta) return [];
 
       streams = await providerRegistry.getAllStreams(meta);
-      if (streams.length > 0) {
+      if (streams && streams.length > 0) {
         cacheService.setStream(cacheKey, streams);
       }
     }

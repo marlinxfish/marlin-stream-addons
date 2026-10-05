@@ -38,7 +38,32 @@ export class CinemetaService {
         }
       }
 
-      if (!data?.meta?.name) return null;
+      if (!data?.meta?.name) {
+        try {
+          const imdbRes = await this.fetchFn(`https://sg.media-imdb.com/suggests/t/${imdbId}.json`, {
+            signal: AbortSignal.timeout(this.timeoutMs),
+          });
+          if (imdbRes.ok) {
+            const text = await imdbRes.text();
+            const match = text.match(/imdb\$[a-zA-Z0-9]+\((.*)\)/);
+            if (match) {
+              const parsed = JSON.parse(match[1]);
+              if (parsed.d && parsed.d.length > 0) {
+                const item = parsed.d[0];
+                return {
+                  imdbId,
+                  type,
+                  title: item.l,
+                  year: typeof item.y === 'number' ? item.y : undefined,
+                  season,
+                  episode,
+                };
+              }
+            }
+          }
+        } catch {}
+        return null;
+      }
       const yearRaw = data.meta.year;
       const year = typeof yearRaw === 'number' ? yearRaw : yearRaw ? parseInt(String(yearRaw), 10) : undefined;
 

@@ -33,7 +33,7 @@ export class VidhideResolver implements BaseResolver {
       const res = await this.fetchFn(targetUrl, {
         headers: {
           'User-Agent': ua,
-          'Referer': config.oppadramaBaseUrl + '/',
+          'Referer': config.oppadramaBaseUrl.replace(/\.nip\.io/g, '') + '/',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         },
         signal: AbortSignal.timeout(this.timeoutMs),
