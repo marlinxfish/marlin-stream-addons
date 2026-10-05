@@ -4,12 +4,16 @@ import { app } from '../src/index';
 import { cacheService } from '../src/services/cache';
 
 describe('Stremio Addon Definition', () => {
-  it('provides a valid manifest with stream resources and movie/series types', () => {
+  it('provides a valid manifest with stream, catalog, and meta resources', () => {
     expect(manifest.id).toBe('community.movieaddons.stream');
     expect(manifest.version).toBe('1.0.0');
     expect(manifest.resources).toContain('stream');
+    expect(manifest.resources).toContain('catalog');
+    expect(manifest.resources).toContain('meta');
     expect(manifest.types).toContain('movie');
     expect(manifest.types).toContain('series');
+    expect(manifest.catalogs.length).toBeGreaterThan(0);
+    expect(manifest.idPrefixes).toContain('oppa:');
   });
 
   it('handles stream requests returning clean streams array', async () => {
@@ -42,5 +46,17 @@ describe('Stremio Addon Definition', () => {
     const streamData = await streamRes.json();
     expect(streamData.streams).toHaveLength(1);
     expect(streamData.streams?.[0]?.name).toBe('TestServer');
+
+    // Test catalog endpoint
+    const catRes = await app.request('/catalog/series/marlin_series/search=dummy.json');
+    expect(catRes.status).toBe(200);
+    const catData = await catRes.json();
+    expect(Array.isArray(catData.metas)).toBe(true);
+
+    // Test meta endpoint
+    const metaRes = await app.request('/meta/series/oppa:unknown.json');
+    expect(metaRes.status).toBe(200);
+    const metaData = await metaRes.json();
+    expect(metaData.meta).toBeDefined();
   });
 });

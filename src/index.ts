@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { manifest, resolveStreams } from './addon';
 import { config } from './config';
 import { cacheService } from './services/cache';
+import { catalogService } from './services/catalog';
 import type { MediaType } from './types';
 
 export const app = new Hono();
@@ -25,13 +26,48 @@ app.use(
   })
 );
 
+// Helper to extract search parameter from Stremio extra segment
+function parseSearchParam(extraParam?: string): string | undefined {
+  if (!extraParam) return undefined;
+  const cleanExtra = extraParam.endsWith('.json') ? extraParam.slice(0, -5) : extraParam;
+  const searchMatch = cleanExtra.match(/search=([^&]+)/);
+  return searchMatch ? decodeURIComponent(searchMatch[1]) : undefined;
+}
+
 // Route: Manifest
-app.get('/manifest.json', (c) => {
-  return c.json(manifest);
+app.get('/manifest.json', (c) => c.json(manifest));
+app.get('/:config/manifest.json', (c) => c.json(manifest));
+
+// Route: Catalog (Browse & Search)
+app.get('/catalog/:type/:id/:extra?', async (c) => {
+  const type = c.req.param('type') as MediaType;
+  const search = parseSearchParam(c.req.param('extra'));
+  const metas = await catalogService.getCatalog(type, search);
+  return c.json({ metas });
 });
 
-app.get('/:config/manifest.json', (c) => {
-  return c.json(manifest);
+app.get('/:config/catalog/:type/:id/:extra?', async (c) => {
+  const type = c.req.param('type') as MediaType;
+  const search = parseSearchParam(c.req.param('extra'));
+  const metas = await catalogService.getCatalog(type, search);
+  return c.json({ metas });
+});
+
+// Route: Meta (Title & Episodes details)
+app.get('/meta/:type/:id', async (c) => {
+  const type = c.req.param('type') as MediaType;
+  const rawId = c.req.param('id');
+  const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
+  const meta = await catalogService.getMeta(type, id);
+  return c.json({ meta: meta || {} });
+});
+
+app.get('/:config/meta/:type/:id', async (c) => {
+  const type = c.req.param('type') as MediaType;
+  const rawId = c.req.param('id');
+  const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
+  const meta = await catalogService.getMeta(type, id);
+  return c.json({ meta: meta || {} });
 });
 
 // Route: Streams
@@ -98,46 +134,46 @@ function renderConfigPage(initialConfig = '') {
     body {
       background: radial-gradient(ellipse at top, #13192e 0%, var(--bg) 75%);
       color: var(--text-main);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      overflow-x: hidden;
     }
     .container {
       width: 100%;
-      max-width: 520px;
+      max-width: 1100px;
+      margin: 0 auto;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 1.5rem;
-      padding: 2.25rem 1.75rem;
+      padding: 2.5rem 2rem;
       box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      position: relative;
     }
-    .header { text-align: center; margin-bottom: 1.75rem; }
+    .header { margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); pb: 1.5rem; padding-bottom: 1.5rem; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
     .badge-icon {
-      width: 4rem;
-      height: 4rem;
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.3));
+      width: 3.5rem;
+      height: 3.5rem;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(99, 102, 241, 0.35));
       border: 1px solid rgba(6, 182, 212, 0.4);
-      border-radius: 1.25rem;
+      border-radius: 1rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      margin-bottom: 0.75rem;
+      font-size: 1.85rem;
       box-shadow: 0 8px 20px var(--primary-glow);
     }
     h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
-    p.subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4; }
-    .badges-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; margin-top: 0.85rem; }
+    p.subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .badges-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
     .pill {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      padding: 0.2rem 0.6rem;
+      padding: 0.25rem 0.65rem;
       border-radius: 2rem;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
@@ -148,17 +184,32 @@ function renderConfigPage(initialConfig = '') {
     }
     .pill.active { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #34d399; }
     
+    /* 2-Column Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 2.25rem;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+      }
+    }
+
     .section-title {
       font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: var(--primary);
-      margin: 1.5rem 0 0.6rem;
+      margin: 1.25rem 0 0.6rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+    .section-title:first-child { margin-top: 0; }
     .section-title span.count { font-size: 0.65rem; color: var(--text-sub); text-transform: none; font-weight: normal; }
 
     /* Provider card */
@@ -285,8 +336,17 @@ function renderConfigPage(initialConfig = '') {
     input:checked + .slider { background: var(--primary); }
     input:checked + .slider:before { transform: translateX(1.05rem); }
 
-    /* Action buttons */
-    .install-box { margin-top: 1.75rem; }
+    /* Right column install box */
+    .install-panel {
+      background: #0b0f1a;
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .install-header h3 { font-size: 1.15rem; font-weight: 800; color: #fff; }
+    .install-header p { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4; }
+
     .btn-main {
       display: flex;
       align-items: center;
@@ -299,12 +359,13 @@ function renderConfigPage(initialConfig = '') {
       font-weight: 800;
       letter-spacing: 0.02em;
       text-decoration: none;
-      padding: 0.95rem;
+      padding: 1rem;
       border-radius: 0.95rem;
       box-shadow: 0 10px 25px -5px var(--primary-glow);
       transition: transform 0.15s, opacity 0.15s;
       border: none;
       cursor: pointer;
+      margin-top: 1.25rem;
     }
     .btn-main:hover { opacity: 0.95; transform: translateY(-1px); }
     .btn-copy {
@@ -313,7 +374,7 @@ function renderConfigPage(initialConfig = '') {
       justify-content: center;
       gap: 0.4rem;
       width: 100%;
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
       color: var(--text-main);
       font-size: 0.8rem;
@@ -324,7 +385,7 @@ function renderConfigPage(initialConfig = '') {
       cursor: pointer;
       transition: background 0.2s;
     }
-    .btn-copy:hover { background: rgba(255, 255, 255, 0.08); }
+    .btn-copy:hover { background: rgba(255, 255, 255, 0.09); }
     .url-display {
       margin-top: 0.75rem;
       background: #05070a;
@@ -348,7 +409,7 @@ function renderConfigPage(initialConfig = '') {
       color: var(--text-muted);
     }
     details.guide summary {
-      padding: 0.65rem 0.85rem;
+      padding: 0.75rem 0.85rem;
       cursor: pointer;
       font-weight: 600;
       color: #cbd5e1;
@@ -361,8 +422,8 @@ function renderConfigPage(initialConfig = '') {
     /* Footer */
     .footer {
       text-align: center;
-      margin-top: 1.5rem;
-      padding-top: 1.2rem;
+      margin-top: 2rem;
+      padding-top: 1.25rem;
       border-top: 1px solid var(--card-border);
       font-size: 0.68rem;
       color: var(--text-sub);
@@ -390,141 +451,161 @@ function renderConfigPage(initialConfig = '') {
 <body>
   <div class="container">
     <div class="header">
-      <div class="badge-icon">🐟</div>
-      <h1>Marlin Stream Addons</h1>
-      <p class="subtitle">Multi-Source Stremio Video Stream Resolver</p>
-      <div class="badges-row">
-        <span class="pill active">🟢 Edge Ready</span>
-        <span class="pill">⚡ Zero-Bandwidth</span>
-        <span class="pill">🇮🇩 Sub Indo (HC)</span>
-      </div>
-    </div>
-
-    <!-- Section 1: Data Sources -->
-    <div class="section-title">
-      <span>Sumber Providers</span>
-      <span class="count">1 Aktif</span>
-    </div>
-    <div class="provider-box">
-      <div class="provider-card active">
-        <div class="provider-info">
-          <span class="icon">🍿</span>
+      <div class="header-top">
+        <div class="header-left">
+          <div class="badge-icon">🐟</div>
           <div>
-            <div class="name">Oppadrama</div>
-            <div class="sub">Drama & Movie Asia</div>
+            <h1>Marlin Stream Addons</h1>
+            <p class="subtitle">Multi-Source Stremio Video Stream & Catalog Resolver</p>
           </div>
         </div>
-        <span class="status-tag green">Aktif</span>
+        <div class="badges-row">
+          <span class="pill active">🟢 Edge Ready</span>
+          <span class="pill">⚡ Zero-Bandwidth</span>
+          <span class="pill">🇮🇩 Sub Indo (HC)</span>
+          <span class="pill">🔍 Search & Catalog</span>
+        </div>
       </div>
-      <div class="provider-card">
-        <div class="provider-info">
-          <span class="icon">🌐</span>
-          <div>
-            <div class="name">Provider Lain</div>
-            <div class="sub">LK21, Rebahin, dll</div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Left Column: Settings -->
+      <div class="grid-left">
+        <!-- Section 1: Data Sources -->
+        <div class="section-title">
+          <span>Sumber Providers</span>
+          <span class="count">1 Aktif</span>
+        </div>
+        <div class="provider-box">
+          <div class="provider-card active">
+            <div class="provider-info">
+              <span class="icon">🍿</span>
+              <div>
+                <div class="name">Oppadrama</div>
+                <div class="sub">Drama & Movie Asia</div>
+              </div>
+            </div>
+            <span class="status-tag green">Aktif</span>
+          </div>
+          <div class="provider-card">
+            <div class="provider-info">
+              <span class="icon">🌐</span>
+              <div>
+                <div class="name">Provider Lain</div>
+                <div class="sub">LK21, Rebahin, dll</div>
+              </div>
+            </div>
+            <span class="status-tag gray">Segera</span>
           </div>
         </div>
-        <span class="status-tag gray">Segera</span>
-      </div>
-    </div>
 
-    <!-- Section 2: Video Servers -->
-    <div class="section-title">
-      <span>Pilihan Server Video</span>
-      <span class="count">Klik untuk aktifkan</span>
-    </div>
-    <div class="servers-grid">
-      <div class="server-card selected" id="card-buzzheavier" onclick="toggleServer('buzzheavier')">
-        <div class="server-card-top">
-          <span class="server-card-name">Buzzheavier</span>
-          <div class="custom-check" id="check-buzzheavier">✓</div>
+        <!-- Section 2: Video Servers -->
+        <div class="section-title">
+          <span>Pilihan Server Video</span>
+          <span class="count">Klik untuk aktifkan</span>
         </div>
-        <div class="server-card-desc">Direct MP4 1080p</div>
-      </div>
+        <div class="servers-grid">
+          <div class="server-card selected" id="card-buzzheavier" onclick="toggleServer('buzzheavier')">
+            <div class="server-card-top">
+              <span class="server-card-name">Buzzheavier</span>
+              <div class="custom-check" id="check-buzzheavier">✓</div>
+            </div>
+            <div class="server-card-desc">Direct MP4 1080p</div>
+          </div>
 
-      <div class="server-card selected" id="card-filelions" onclick="toggleServer('filelions')">
-        <div class="server-card-top">
-          <span class="server-card-name">FileLions</span>
-          <div class="custom-check" id="check-filelions">✓</div>
+          <div class="server-card selected" id="card-filelions" onclick="toggleServer('filelions')">
+            <div class="server-card-top">
+              <span class="server-card-name">FileLions</span>
+              <div class="custom-check" id="check-filelions">✓</div>
+            </div>
+            <div class="server-card-desc">HLS .m3u8 Stream</div>
+          </div>
+
+          <div class="server-card selected" id="card-vidhide" onclick="toggleServer('vidhide')">
+            <div class="server-card-top">
+              <span class="server-card-name">Vidhide</span>
+              <div class="custom-check" id="check-vidhide">✓</div>
+            </div>
+            <div class="server-card-desc">EarnVids HLS</div>
+          </div>
+
+          <div class="server-card" id="card-datanodes" onclick="toggleServer('datanodes')">
+            <div class="server-card-top">
+              <span class="server-card-name">DataNodes</span>
+              <div class="custom-check" id="check-datanodes"></div>
+            </div>
+            <div class="server-card-desc">Direct File Server</div>
+          </div>
         </div>
-        <div class="server-card-desc">HLS .m3u8 Stream</div>
-      </div>
 
-      <div class="server-card selected" id="card-vidhide" onclick="toggleServer('vidhide')">
-        <div class="server-card-top">
-          <span class="server-card-name">Vidhide</span>
-          <div class="custom-check" id="check-vidhide">✓</div>
+        <!-- Section 3: Resolution -->
+        <div class="section-title">Batas Maksimal Resolusi</div>
+        <div class="res-tabs">
+          <button type="button" class="res-btn active" id="res-1080p" onclick="setResolution('1080p')">1080p (FHD)</button>
+          <button type="button" class="res-btn" id="res-720p" onclick="setResolution('720p')">720p (HD)</button>
+          <button type="button" class="res-btn" id="res-480p" onclick="setResolution('480p')">480p (SD)</button>
         </div>
-        <div class="server-card-desc">EarnVids HLS</div>
-      </div>
 
-      <div class="server-card" id="card-datanodes" onclick="toggleServer('datanodes')">
-        <div class="server-card-top">
-          <span class="server-card-name">DataNodes</span>
-          <div class="custom-check" id="check-datanodes"></div>
+        <!-- Section 4: Display Options -->
+        <div class="section-title">Opsi Informasi Stream</div>
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">Kecepatan Server (Ping Latency)</div>
+            <div class="switch-desc">Tampilkan indikator respon server 🚀 ms di judul video</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-speed" checked onchange="updateManifest()">
+            <span class="slider"></span>
+          </label>
         </div>
-        <div class="server-card-desc">Direct File Server</div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-label">Ukuran File (File Size / Bitrate)</div>
+            <div class="switch-desc">Tampilkan estimasi 💾 MB/GB atau Adaptive HLS</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-size" checked onchange="updateManifest()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Right Column: Installation Panel -->
+      <div class="grid-right">
+        <div class="install-panel">
+          <div class="install-header">
+            <h3>Pasang ke Stremio</h3>
+            <p>Konfigurasi di samping otomatis ter-encode ke link manifest di bawah ini.</p>
+          </div>
+
+          <a id="btn-install" class="btn-main" href="#">
+            <span>📥</span>
+            <span>INSTALL ADDON KE STREMIO</span>
+          </a>
+          <button type="button" class="btn-copy" onclick="copyManifestUrl()">
+            <span>📋</span>
+            <span>Salin Link Manifest</span>
+          </button>
+          <div id="url-preview" class="url-display"></div>
+
+          <!-- Guide -->
+          <details class="guide" open>
+            <summary>💡 Cara Pasang & Cari Film di Stremio</summary>
+            <div class="guide-content">
+              <ol>
+                <li><strong>Otomatis (PC & HP):</strong> Klik tombol <strong>INSTALL ADDON KE STREMIO</strong> di atas untuk membuka aplikasi Stremio langsung.</li>
+                <li><strong>Pencarian Film:</strong> Di kolom search bar Stremio, ketik judul drama/film (misal: <em>Against the Current</em> atau <em>One Night Only</em>). Judul dari Oppadrama akan langsung muncul lengkap dengan poster!</li>
+                <li><strong>Discover Catalog:</strong> Buka menu <strong>Discover</strong> di Stremio, pilih katalog <strong>Marlin - Oppadrama Series</strong> atau <strong>Movies</strong> untuk menjelajahi update episode terbaru.</li>
+              </ol>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
-
-    <!-- Section 3: Resolution -->
-    <div class="section-title">Batas Maksimal Resolusi</div>
-    <div class="res-tabs">
-      <button type="button" class="res-btn active" id="res-1080p" onclick="setResolution('1080p')">1080p (FHD)</button>
-      <button type="button" class="res-btn" id="res-720p" onclick="setResolution('720p')">720p (HD)</button>
-      <button type="button" class="res-btn" id="res-480p" onclick="setResolution('480p')">480p (SD)</button>
-    </div>
-
-    <!-- Section 4: Display Options -->
-    <div class="section-title">Opsi Informasi Stream</div>
-    <div class="switch-row">
-      <div>
-        <div class="switch-label">Kecepatan Server (Ping Latency)</div>
-        <div class="switch-desc">Tampilkan indikator respon server 🚀 ms di judul video</div>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="toggle-speed" checked onchange="updateManifest()">
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div class="switch-row">
-      <div>
-        <div class="switch-label">Ukuran File (File Size / Bitrate)</div>
-        <div class="switch-desc">Tampilkan estimasi 💾 MB/GB atau Adaptive HLS</div>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="toggle-size" checked onchange="updateManifest()">
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <!-- Actions -->
-    <div class="install-box">
-      <a id="btn-install" class="btn-main" href="#">
-        <span>📥</span>
-        <span>INSTALL ADDON KE STREMIO</span>
-      </a>
-      <button type="button" class="btn-copy" onclick="copyManifestUrl()">
-        <span>📋</span>
-        <span>Salin Link Manifest</span>
-      </button>
-      <div id="url-preview" class="url-display"></div>
-    </div>
-
-    <!-- Guide -->
-    <details class="guide">
-      <summary>💡 Cara Pasang di Stremio (Web / PC / Android)</summary>
-      <div class="guide-content">
-        <ol>
-          <li><strong>Otomatis (PC & HP):</strong> Klik tombol <strong>INSTALL ADDON KE STREMIO</strong> di atas. Aplikasi Stremio akan terbuka otomatis.</li>
-          <li><strong>Manual (Stremio Web / Android TV):</strong> Klik <strong>Salin Link Manifest</strong> di atas. Di Stremio, buka menu <strong>Addons (🧩)</strong>, paste link ke kolom pencarian lalu tekan Enter.</li>
-        </ol>
-      </div>
-    </details>
 
     <div class="footer">
-      ⚠️ <strong>Educational & Research Use Only:</strong> Software ini beroperasi murni sebagai URL resolver publik dan tidak menyimpan atau men-stream media video apapun di server.
+      ⚠️ <strong>Educational & Research Use Only:</strong> Software ini beroperasi murni sebagai URL resolver dan indexer publik, tidak menyimpan atau men-stream media video apapun di server.
     </div>
   </div>
 
@@ -558,7 +639,6 @@ function renderConfigPage(initialConfig = '') {
         }
       } catch (e) {}
 
-      // Sync DOM state
       syncDom();
       updateManifest();
     })();
