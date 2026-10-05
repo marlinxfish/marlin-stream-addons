@@ -12,7 +12,7 @@ export const manifest = {
   id: 'community.movieaddons.stream',
   version: '1.0.0',
   name: 'Marlin Stream Addons',
-  description: 'Multi-source stream resolver for movies & series with zero-bandwidth direct streaming.',
+  description: 'Educational stream resolver indexer for Stremio. Zero-bandwidth direct streaming from public sources. Does not host or store any media.',
   resources: ['stream'],
   types: ['movie', 'series'],
   catalogs: [],

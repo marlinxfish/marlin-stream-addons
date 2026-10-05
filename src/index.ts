@@ -90,6 +90,9 @@ app.get('/', (c) => {
           <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.5;">Multi-source video stream resolver for Stremio with zero-bandwidth direct streaming.</p>
           <a class="btn" href="${stremioUrl}">INSTALL ADDON</a>
           <div class="code">${manifestUrl}</div>
+          <p style="font-size: 0.7rem; color: #64748b; margin-top: 1.5rem; line-height: 1.4;">
+            ⚠️ <strong>Educational Purpose Only:</strong> This service does not host, store, or stream any media files. All streams are indexed from public third-party sources.
+          </p>
         </div>
       </body>
     </html>
