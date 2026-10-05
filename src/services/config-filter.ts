@@ -33,23 +33,36 @@ export function filterStreamsByConfig(
 ): StreamResult[] {
   if (!config) return streams;
 
-  return streams.filter((stream) => {
-    // Check server toggle
-    if (config.servers && stream.server) {
-      const serverKey = stream.server.toLowerCase();
-      if (serverKey.includes('buzzheavier') && config.servers.buzzheavier === false) return false;
-      if (serverKey.includes('filelions') && config.servers.filelions === false) return false;
-      if (serverKey.includes('vidhide') && config.servers.vidhide === false) return false;
-      if (serverKey.includes('datanodes') && config.servers.datanodes === false) return false;
-    }
+  return streams
+    .filter((stream) => {
+      // Check server toggle
+      if (config.servers && stream.server) {
+        const serverKey = stream.server.toLowerCase();
+        if (config.servers.buzzheavier === false && serverKey.includes('buzzheavier')) return false;
+        if (config.servers.filelions === false && serverKey.includes('filelions')) return false;
+        if (config.servers.vidhide === false && serverKey.includes('vidhide')) return false;
+        if (config.servers.datanodes === false && serverKey.includes('datanodes')) return false;
+      }
 
-    // Check resolution limit
-    if (config.maxResolution && stream.quality) {
-      const q = stream.quality.toLowerCase();
-      if (config.maxResolution === '720p' && q.includes('1080p')) return false;
-      if (config.maxResolution === '480p' && (q.includes('1080p') || q.includes('720p'))) return false;
-    }
+      // Check resolution limit
+      if (config.maxResolution && stream.quality) {
+        const q = stream.quality.toLowerCase();
+        if (config.maxResolution === '720p' && q.includes('1080p')) return false;
+        if (config.maxResolution === '480p' && (q.includes('1080p') || q.includes('720p'))) return false;
+      }
 
-    return true;
-  });
+      return true;
+    })
+    .map((stream) => {
+      let title = stream.title;
+      if (title) {
+        if (config.showSpeed === false) {
+          title = title.replace(/ • 🚀 \d+ms/g, '');
+        }
+        if (config.showSize === false) {
+          title = title.replace(/ • 💾 [^•]+?(?= •|$)/g, '');
+        }
+      }
+      return { ...stream, title };
+    });
 }

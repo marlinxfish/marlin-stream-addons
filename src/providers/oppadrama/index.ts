@@ -137,7 +137,7 @@ export class OppadramaProvider implements BaseProvider {
             ? `📡 ${query.title}${query.year ? ` (${query.year})` : ''} • S${String(query.season).padStart(2, '0')}E${String(query.episode).padStart(2, '0')}`
             : `🎬 ${query.title}${query.year ? ` (${query.year})` : ''}`;
 
-          const displayTitle = `${headerLine}\n⚡ ${server} • 💾 ${quality}${sizeText}${speedText} • 🇮🇩 Sub Indo`;
+          const displayTitle = `${headerLine}\n⚡ ${server} • ${quality}${sizeText}${speedText} • 🇮🇩 Sub Indo`;
           const displayName = `${config.addonIcon}\n${config.addonName}\n${quality}`;
 
           return {

@@ -78,4 +78,24 @@ describe('Config Filter Service in Backend', () => {
     expect(res.streams[0].server).toBe('FileLions');
     expect(res.streams[0].quality).toBe('720p');
   });
+  it('strips speed and size from title when showSpeed or showSize is false', () => {
+    const rawStreams: StreamResult[] = [
+      {
+        name: 'OppaDrama\n1080p',
+        title: '🎬 Movie (2026)\n⚡ Buzzheavier • 1080p • 💾 1.2 GB • 🚀 45ms • 🇮🇩 Sub Indo',
+        url: 'http://cdn1',
+        server: 'Buzzheavier',
+        quality: '1080p',
+      },
+    ];
+
+    const withoutSpeed = filterStreamsByConfig(rawStreams, { showSpeed: false, showSize: true });
+    expect(withoutSpeed[0].title).toBe('🎬 Movie (2026)\n⚡ Buzzheavier • 1080p • 💾 1.2 GB • 🇮🇩 Sub Indo');
+
+    const withoutSize = filterStreamsByConfig(rawStreams, { showSpeed: true, showSize: false });
+    expect(withoutSize[0].title).toBe('🎬 Movie (2026)\n⚡ Buzzheavier • 1080p • 🚀 45ms • 🇮🇩 Sub Indo');
+
+    const withoutBoth = filterStreamsByConfig(rawStreams, { showSpeed: false, showSize: false });
+    expect(withoutBoth[0].title).toBe('🎬 Movie (2026)\n⚡ Buzzheavier • 1080p • 🇮🇩 Sub Indo');
+  });
 });
