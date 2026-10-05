@@ -6,8 +6,8 @@ import { ProviderRegistry } from './providers/registry';
 import { defaultResolverRegistry } from './resolvers/registry';
 import { cacheService } from './services/cache';
 import { cinemetaService } from './services/cinemeta';
-import { MediaType, StreamResult } from './types';
-
+import type { MediaType, StreamResult } from './types';
+import { decodeConfigParam, filterStreamsByConfig } from './services/config-filter';
 const manifest = {
   id: 'community.movieaddons.stream',
   version: '1.0.0',
@@ -25,28 +25,23 @@ export const builder = new addonBuilder(manifest);
 export const providerRegistry = new ProviderRegistry();
 providerRegistry.register(new OppadramaProvider(config.oppadramaBaseUrl, defaultResolverRegistry));
 
-builder.defineStreamHandler(async ({ type, id }: { type: MediaType; id: string }) => {
+builder.defineStreamHandler(async ({ type, id, config: rawConfig }: { type: MediaType; id: string; config?: string }) => {
   try {
+    const userConfig = decodeConfigParam(rawConfig);
     const cacheKey = `stream:${type}:${id}`;
-    const cached = cacheService.getStream(cacheKey);
-    if (cached) {
-      return { streams: cached };
+    let streams = cacheService.getStream(cacheKey);
+
+    if (!streams) {
+      const meta = await cinemetaService.lookup(type, id);
+      if (!meta) return { streams: [] };
+
+      streams = await providerRegistry.getAllStreams(meta);
+      if (streams.length > 0) {
+        cacheService.setStream(cacheKey, streams);
+      }
     }
 
-    // Resolve meta via Cinemeta
-    const meta = await cinemetaService.lookup(type, id);
-    if (!meta) {
-      return { streams: [] };
-    }
-
-    // Query providers
-    const streams: StreamResult[] = await providerRegistry.getAllStreams(meta);
-
-    if (streams.length > 0) {
-      cacheService.setStream(cacheKey, streams);
-    }
-
-    return { streams };
+    return { streams: filterStreamsByConfig(streams, userConfig) };
   } catch (err) {
     console.error(`[StreamHandler] Error processing ${type}/${id}:`, err);
     return { streams: [] };
