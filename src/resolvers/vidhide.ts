@@ -1,14 +1,16 @@
+import { config } from '../config';
 import { StreamResult } from '../types';
 import { BaseResolver } from './base';
 
 export class VidhideResolver implements BaseResolver {
   readonly name = 'Vidhide';
   private fetchFn: typeof fetch;
+  private timeoutMs: number;
 
-  constructor(fetchFn: typeof fetch = fetch) {
+  constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
     this.fetchFn = fetchFn;
+    this.timeoutMs = timeoutMs;
   }
-
   canResolve(url: string): boolean {
     return url.includes('vidhide') || url.includes('earnvids');
   }
@@ -17,7 +19,7 @@ export class VidhideResolver implements BaseResolver {
     try {
       const res = await this.fetchFn(url, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(this.timeoutMs),
       });
       if (!res.ok) return null;
 

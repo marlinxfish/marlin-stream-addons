@@ -1,14 +1,16 @@
+import { config } from '../config';
 import { StreamResult } from '../types';
 import { BaseResolver } from './base';
 
 export class BuzzheavierResolver implements BaseResolver {
   readonly name = 'Buzzheavier';
   private fetchFn: typeof fetch;
+  private timeoutMs: number;
 
-  constructor(fetchFn: typeof fetch = fetch) {
+  constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
     this.fetchFn = fetchFn;
+    this.timeoutMs = timeoutMs;
   }
-
   canResolve(url: string): boolean {
     return url.includes('buzzheavier.com');
   }
@@ -25,7 +27,7 @@ export class BuzzheavierResolver implements BaseResolver {
         method: 'HEAD',
         redirect: 'manual',
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(this.timeoutMs),
       });
 
       const location = res.headers.get('location');

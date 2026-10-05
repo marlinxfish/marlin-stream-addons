@@ -88,6 +88,53 @@ describe('OppadramaProvider', () => {
 
     expect(streams).toEqual([]);
   });
+
+  it('prioritizes series episode resolution before general links', async () => {
+    const searchHtml = `<div class="result-item"><a href="http://212.86.121.175/series/test-show"><h2 class="title">Test Show (2025)</h2></a></div>`;
+    const seriesDetailHtml = `
+      <div class="eplister">
+        <ul>
+          <li><a href="http://212.86.121.175/test-show-episode-1"><span class="epl-num">1</span><span class="epl-title">Episode 1</span></a></li>
+          <li><a href="http://212.86.121.175/test-show-episode-2"><span class="epl-num">2</span><span class="epl-title">Episode 2</span></a></li>
+        </ul>
+      </div>
+      <ul>
+        <li><strong>Buzzheavier</strong> - 720p <a href="https://buzzheavier.com/show_overall">Download</a></li>
+      </ul>
+    `;
+    const episodeDetailHtml = `
+      <ul>
+        <li><strong>Buzzheavier</strong> - 1080p <a href="https://buzzheavier.com/ep2_link">Download</a></li>
+      </ul>
+    `;
+
+    const mockFetch = mock(async (url: string | URL | Request) => {
+      const urlStr = String(url);
+      if (urlStr.includes('/?s=')) return new Response(searchHtml, { status: 200 });
+      if (urlStr.includes('test-show-episode-2')) return new Response(episodeDetailHtml, { status: 200 });
+      if (urlStr.includes('test-show')) return new Response(seriesDetailHtml, { status: 200 });
+      return new Response('Not found', { status: 404 });
+    });
+
+    const registry = new ResolverRegistry();
+    registry.resolve = mock(async (url: string, quality?: string) => ({
+      name: `[Mock] ${quality}`,
+      title: `Resolved ${url}`,
+      url,
+    }));
+
+    const provider = new OppadramaProvider('http://212.86.121.175', registry, mockFetch as unknown as typeof fetch, 2500);
+    const streams = await provider.getStreams({
+      imdbId: 'tt9999999',
+      type: 'series',
+      title: 'Test Show',
+      season: 1,
+      episode: 2,
+    });
+
+    expect(streams.length).toBe(1);
+    expect(streams[0].url).toBe('https://buzzheavier.com/ep2_link');
+  });
 });
 
 describe('ProviderRegistry', () => {

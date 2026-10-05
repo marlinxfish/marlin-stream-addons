@@ -1,29 +1,33 @@
+import { config } from '../../config';
 import { ResolverRegistry } from '../../resolvers/registry';
 import { MediaItemQuery, StreamResult } from '../../types';
 import { BaseProvider } from '../base';
-import { parseDownloadLinks, parseEpisodeUrl, parseSearchResults } from './parser';
+import { ExtractedLink, parseDownloadLinks, parseEpisodeUrl, parseSearchResults } from './parser';
 
 export class OppadramaProvider implements BaseProvider {
   readonly name = 'Oppadrama';
   readonly baseUrl: string;
   private resolverRegistry: ResolverRegistry;
   private fetchFn: typeof fetch;
+  private timeoutMs: number;
 
   constructor(
     baseUrl: string,
     resolverRegistry: ResolverRegistry,
-    fetchFn: typeof fetch = fetch
+    fetchFn: typeof fetch = fetch,
+    timeoutMs: number = config.requestTimeoutMs
   ) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.resolverRegistry = resolverRegistry;
     this.fetchFn = fetchFn;
+    this.timeoutMs = timeoutMs;
   }
 
   async getStreams(query: MediaItemQuery): Promise<StreamResult[]> {
     try {
       const searchUrl = `${this.baseUrl}/?s=${encodeURIComponent(query.title)}`;
       const searchRes = await this.fetchFn(searchUrl, {
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(this.timeoutMs),
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       });
       if (!searchRes.ok) return [];
@@ -43,19 +47,37 @@ export class OppadramaProvider implements BaseProvider {
 
       // Fetch detail page
       const detailRes = await this.fetchFn(matchedEntry.url, {
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(this.timeoutMs),
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       });
       if (!detailRes.ok) return [];
 
       let detailHtml = await detailRes.text();
-      let extractedLinks = parseDownloadLinks(detailHtml);
+      let extractedLinks: ExtractedLink[] = [];
+
+      if (query.type === 'series' && query.episode !== undefined) {
+        const episodeUrl = parseEpisodeUrl(detailHtml, query.episode);
+        if (episodeUrl) {
+          const epRes = await this.fetchFn(episodeUrl, {
+            signal: AbortSignal.timeout(this.timeoutMs),
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+          });
+          if (epRes.ok) {
+            detailHtml = await epRes.text();
+            extractedLinks = parseDownloadLinks(detailHtml);
+          }
+        }
+      }
+
+      if (extractedLinks.length === 0) {
+        extractedLinks = parseDownloadLinks(detailHtml);
+      }
 
       if (extractedLinks.length === 0) {
         const episodeUrl = parseEpisodeUrl(detailHtml, query.episode);
         if (episodeUrl) {
           const epRes = await this.fetchFn(episodeUrl, {
-            signal: AbortSignal.timeout(6000),
+            signal: AbortSignal.timeout(this.timeoutMs),
             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
           });
           if (epRes.ok) {
