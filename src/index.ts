@@ -42,6 +42,12 @@ app.get('/:config/stream/:type/:id.json', async (req, res) => {
   }
 });
 
+// Configure routes (redirects to configuration web portal)
+app.get(['/configure', '/:config/configure'], (req, res) => {
+  const configParam = req.params.config ? `?config=${encodeURIComponent(req.params.config)}` : '';
+  res.redirect(`http://localhost:3000/${configParam}`);
+});
+
 // Landing page with one-click install button
 const landingHTML = landingTemplate(addonInterface.manifest);
 app.get('/', (_, res) => {
