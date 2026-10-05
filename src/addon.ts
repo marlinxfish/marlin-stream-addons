@@ -11,8 +11,8 @@ import { decodeConfigParam, filterStreamsByConfig } from './services/config-filt
 const manifest = {
   id: 'community.movieaddons.stream',
   version: '1.0.0',
-  name: 'Movie Addons (Oppadrama & Multi-Provider)',
-  description: 'Stream resolver for movies & series from Oppadrama and community sources with zero-bandwidth direct streaming.',
+  name: 'Marlin Stream Addons',
+  description: 'Multi-source stream resolver for movies & series with zero-bandwidth direct streaming.',
   resources: ['stream'],
   types: ['movie', 'series'],
   catalogs: [],

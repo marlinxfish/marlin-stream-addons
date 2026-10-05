@@ -17,8 +17,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     cacheMetaTtl: Number(env.CACHE_META_TTL) || 86400,
     requestTimeoutMs: Number(env.REQUEST_TIMEOUT_MS) || 6000,
     proxyUrl: env.PROXY_URL || env.HTTP_PROXY || env.HTTPS_PROXY,
-    addonName: env.ADDON_NAME || 'OppaDrama',
-    addonIcon: env.ADDON_ICON || '🍿',
+    addonName: env.ADDON_NAME || 'Marlin Stream',
+    addonIcon: env.ADDON_ICON || '🐟',
   };
 }
 
