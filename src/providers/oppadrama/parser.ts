@@ -56,6 +56,25 @@ export function parseDownloadLinks(html: string): ExtractedLink[] {
     links.push({ server, quality, url: href });
   });
 
+  // Parse embedded video mirrors (<select class="mirror">)
+  $('select.mirror option').each((_, el) => {
+    const val = $(el).attr('value');
+    const label = $(el).text().trim();
+    if (val && val.length > 10) {
+      try {
+        const decoded = Buffer.from(val, 'base64').toString('utf8');
+        const srcMatch = decoded.match(/src=["'](https?:\/\/[^"']+)["']/i);
+        if (srcMatch && srcMatch[1]) {
+          links.push({
+            server: label || 'Mirror',
+            quality: '720p',
+            url: srcMatch[1],
+          });
+        }
+      } catch {}
+    }
+  });
+
   return links;
 }
 

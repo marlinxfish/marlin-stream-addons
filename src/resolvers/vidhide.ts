@@ -12,28 +12,69 @@ export class VidhideResolver implements BaseResolver {
     this.timeoutMs = timeoutMs;
   }
   canResolve(url: string): boolean {
-    return url.includes('vidhide') || url.includes('earnvids');
+    return (
+      url.includes('vidhide') ||
+      url.includes('earnvids') ||
+      url.includes('minochinos') ||
+      url.includes('filelions')
+    );
   }
 
   async resolve(url: string, qualityHint = '720p'): Promise<StreamResult | null> {
     try {
-      const res = await this.fetchFn(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+      let targetUrl = url;
+      if (targetUrl.includes('/d/')) {
+        targetUrl = targetUrl.replace('/d/', '/v/');
+      }
+
+      const res = await this.fetchFn(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Referer': config.oppadramaBaseUrl + '/',
+        },
         signal: AbortSignal.timeout(this.timeoutMs),
       });
       if (!res.ok) return null;
 
       const html = await res.text();
-      // Extract m3u8 link from javascript or source tag
-      const m3u8Match = html.match(/(https?:\/\/[^"']+\.m3u8[^"']*)/);
-      if (!m3u8Match) return null;
+      let streamUrl: string | null = null;
 
-      const streamUrl = m3u8Match[1];
-      const origin = new URL(url).origin;
+      // Check Dean Edwards packer
+      const marker = 'eval(function(p,a,c,k,e,d)';
+      const start = html.indexOf(marker);
+      if (start !== -1) {
+        const end = html.indexOf(".split('|')))", start);
+        if (end !== -1) {
+          const block = html.slice(start, end + 13);
+          try {
+            const fn = new Function(block.replace(/^eval/, 'return'));
+            const unpacked = fn();
+            const m3u8Match = unpacked.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
+            if (m3u8Match) {
+              streamUrl = m3u8Match[1];
+            }
+          } catch {
+            // fallback to regex on raw html
+          }
+        }
+      }
+
+      if (!streamUrl) {
+        const rawMatch = html.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
+        if (rawMatch) {
+          streamUrl = rawMatch[1];
+        }
+      }
+
+      if (!streamUrl) return null;
+
+      const origin = new URL(targetUrl).origin;
+      const isFileLions = targetUrl.includes('minochinos') || targetUrl.includes('filelions');
+      const serverLabel = isFileLions ? 'FileLions' : 'Vidhide';
 
       return {
-        name: `[Vidhide] ${qualityHint}`,
-        title: `Vidhide (${qualityHint})`,
+        name: `[${serverLabel}] ${qualityHint}`,
+        title: `${serverLabel} (${qualityHint})`,
         url: streamUrl,
         quality: qualityHint,
         behaviorHints: {
