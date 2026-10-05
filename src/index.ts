@@ -72,118 +72,586 @@ app.get('/cache/clear', (c) => {
   return c.json({ status: 'ok', message: 'In-memory cache purged successfully' });
 });
 
-function renderConfigPage() {
+function renderConfigPage(initialConfig = '') {
   return `<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <title>Marlin Stream Addons - Konfigurasi</title>
+  <title>Marlin Stream Addons - Konfigurasi Resmi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root { --bg: #0b0d14; --card: #131722; --border: #1f293d; --primary: #06b6d4; --text: #f1f5f9; --sub: #94a3b8; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 1.25rem; max-width: 480px; width: 100%; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    .header { text-align: center; margin-bottom: 1.5rem; }
-    .logo { font-size: 2.75rem; margin-bottom: 0.25rem; }
-    h1 { font-size: 1.4rem; font-weight: 800; color: #fff; }
-    p.desc { font-size: 0.8rem; color: var(--sub); margin-top: 0.25rem; line-height: 1.4; }
-    .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight: 700; margin: 1.25rem 0 0.5rem; }
-    .servers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    .server-item { background: #0c101a; border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.65rem 0.75rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 0.8rem; }
-    .server-item input { cursor: pointer; accent-color: var(--primary); width: 1rem; height: 1rem; }
-    select { width: 100%; background: #0c101a; border: 1px solid var(--border); border-radius: 0.75rem; color: #fff; padding: 0.65rem; font-size: 0.85rem; outline: none; }
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 0.65rem; font-size: 0.8rem; color: #cbd5e1; }
-    .toggle-row input { accent-color: var(--primary); width: 1.1rem; height: 1.1rem; cursor: pointer; }
-    .btn-install { display: block; width: 100%; background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; text-align: center; text-decoration: none; font-weight: 700; font-size: 0.9rem; padding: 0.85rem; border-radius: 0.75rem; margin-top: 1.5rem; border: none; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 10px 15px -3px rgba(6,182,212,0.3); }
-    .btn-install:hover { opacity: 0.9; }
-    .btn-copy { display: block; width: 100%; background: #1e293b; color: #cbd5e1; border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.65rem; font-size: 0.8rem; margin-top: 0.5rem; cursor: pointer; text-align: center; }
-    .url-box { margin-top: 1rem; background: #07090e; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; font-family: monospace; font-size: 0.7rem; color: var(--sub); word-break: break-all; }
-    .footer { margin-top: 1.25rem; text-align: center; font-size: 0.65rem; color: #475569; line-height: 1.4; }
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(15, 20, 34, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(30, 41, 65, 0.6);
+      --primary: #06b6d4;
+      --primary-hover: #0891b2;
+      --primary-glow: rgba(6, 182, 212, 0.25);
+      --accent: #6366f1;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body {
+      background: radial-gradient(ellipse at top, #13192e 0%, var(--bg) 75%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 1.5rem;
+      padding: 2.25rem 1.75rem;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: relative;
+    }
+    .header { text-align: center; margin-bottom: 1.75rem; }
+    .badge-icon {
+      width: 4rem;
+      height: 4rem;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.3));
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      border-radius: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 8px 20px var(--primary-glow);
+    }
+    h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+    p.subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4; }
+    .badges-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; margin-top: 0.85rem; }
+    .pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .pill.active { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #34d399; }
+    
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      margin: 1.5rem 0 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title span.count { font-size: 0.65rem; color: var(--text-sub); text-transform: none; font-weight: normal; }
+
+    /* Provider card */
+    .provider-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+    .provider-card {
+      background: #0b0f1a;
+      border: 1px solid var(--card-border);
+      border-radius: 0.9rem;
+      padding: 0.75rem 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .provider-card.active { border-color: rgba(6, 182, 212, 0.35); background: rgba(6, 182, 212, 0.05); }
+    .provider-info { display: flex; align-items: center; gap: 0.5rem; }
+    .provider-info .icon { font-size: 1.25rem; }
+    .provider-info .name { font-size: 0.8rem; font-weight: 700; color: #fff; }
+    .provider-info .sub { font-size: 0.65rem; color: var(--text-muted); }
+    .status-tag { font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 0.4rem; }
+    .status-tag.green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .status-tag.gray { background: rgba(255, 255, 255, 0.06); color: var(--text-sub); }
+
+    /* Servers grid */
+    .servers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .server-card {
+      background: #0b0f1a;
+      border: 1px solid var(--card-border);
+      border-radius: 0.9rem;
+      padding: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 4.5rem;
+    }
+    .server-card:hover { background: var(--card-hover); border-color: rgba(255,255,255,0.15); }
+    .server-card.selected {
+      background: rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.5);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.1);
+    }
+    .server-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .server-card-name { font-size: 0.82rem; font-weight: 700; color: #fff; }
+    .server-card-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.4rem; }
+    .custom-check {
+      width: 1.1rem;
+      height: 1.1rem;
+      border-radius: 0.35rem;
+      border: 1.5px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      transition: all 0.15s;
+    }
+    .server-card.selected .custom-check { background: var(--primary); border-color: var(--primary); }
+
+    /* Resolution tabs */
+    .res-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; background: #0b0f1a; padding: 0.3rem; border-radius: 0.85rem; border: 1px solid var(--card-border); }
+    .res-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.55rem;
+      border-radius: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .res-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    /* Switch toggle row */
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0b0f1a;
+      border: 1px solid var(--card-border);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .switch-label { font-size: 0.78rem; font-weight: 600; color: #fff; }
+    .switch-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 2.4rem;
+      height: 1.35rem;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #1e293b;
+      transition: .2s;
+      border-radius: 2rem;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 1rem;
+      width: 1rem;
+      left: 0.18rem;
+      bottom: 0.18rem;
+      background: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background: var(--primary); }
+    input:checked + .slider:before { transform: translateX(1.05rem); }
+
+    /* Action buttons */
+    .install-box { margin-top: 1.75rem; }
+    .btn-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      background: linear-gradient(135deg, #06b6d4, #4f46e5);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      padding: 0.95rem;
+      border-radius: 0.95rem;
+      box-shadow: 0 10px 25px -5px var(--primary-glow);
+      transition: transform 0.15s, opacity 0.15s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-main:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-copy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.75rem;
+      border-radius: 0.85rem;
+      margin-top: 0.6rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-copy:hover { background: rgba(255, 255, 255, 0.08); }
+    .url-display {
+      margin-top: 0.75rem;
+      background: #05070a;
+      border: 1px solid var(--card-border);
+      border-radius: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      user-select: all;
+    }
+
+    /* Guide accordion */
+    details.guide {
+      margin-top: 1.25rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 0.85rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    details.guide summary {
+      padding: 0.65rem 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #cbd5e1;
+      user-select: none;
+    }
+    details.guide .guide-content { padding: 0.5rem 0.85rem 0.85rem; line-height: 1.5; border-top: 1px solid var(--card-border); }
+    details.guide ol { padding-left: 1.2rem; }
+    details.guide li { margin-bottom: 0.35rem; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.68rem;
+      color: var(--text-sub);
+      line-height: 1.45;
+    }
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      background: #10b981;
+      color: #fff;
+      padding: 0.6rem 1.25rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="container">
     <div class="header">
-      <div class="logo">🐟</div>
+      <div class="badge-icon">🐟</div>
       <h1>Marlin Stream Addons</h1>
-      <p class="desc">Multi-Source Video Stream Resolver untuk Stremio</p>
+      <p class="subtitle">Multi-Source Stremio Video Stream Resolver</p>
+      <div class="badges-row">
+        <span class="pill active">🟢 Edge Ready</span>
+        <span class="pill">⚡ Zero-Bandwidth</span>
+        <span class="pill">🇮🇩 Sub Indo (HC)</span>
+      </div>
     </div>
 
-    <div class="section-title">Pilihan Server Video</div>
+    <!-- Section 1: Data Sources -->
+    <div class="section-title">
+      <span>Sumber Providers</span>
+      <span class="count">1 Aktif</span>
+    </div>
+    <div class="provider-box">
+      <div class="provider-card active">
+        <div class="provider-info">
+          <span class="icon">🍿</span>
+          <div>
+            <div class="name">Oppadrama</div>
+            <div class="sub">Drama & Movie Asia</div>
+          </div>
+        </div>
+        <span class="status-tag green">Aktif</span>
+      </div>
+      <div class="provider-card">
+        <div class="provider-info">
+          <span class="icon">🌐</span>
+          <div>
+            <div class="name">Provider Lain</div>
+            <div class="sub">LK21, Rebahin, dll</div>
+          </div>
+        </div>
+        <span class="status-tag gray">Segera</span>
+      </div>
+    </div>
+
+    <!-- Section 2: Video Servers -->
+    <div class="section-title">
+      <span>Pilihan Server Video</span>
+      <span class="count">Klik untuk aktifkan</span>
+    </div>
     <div class="servers-grid">
-      <label class="server-item"><span>⚡ Buzzheavier (MP4)</span><input type="checkbox" id="srv-buzzheavier" checked onchange="updateLinks()"></label>
-      <label class="server-item"><span>⚡ FileLions (HLS)</span><input type="checkbox" id="srv-filelions" checked onchange="updateLinks()"></label>
-      <label class="server-item"><span>⚡ Vidhide (EarnVids)</span><input type="checkbox" id="srv-vidhide" checked onchange="updateLinks()"></label>
-      <label class="server-item"><span>⚡ DataNodes</span><input type="checkbox" id="srv-datanodes" onchange="updateLinks()"></label>
+      <div class="server-card selected" id="card-buzzheavier" onclick="toggleServer('buzzheavier')">
+        <div class="server-card-top">
+          <span class="server-card-name">Buzzheavier</span>
+          <div class="custom-check" id="check-buzzheavier">✓</div>
+        </div>
+        <div class="server-card-desc">Direct MP4 1080p</div>
+      </div>
+
+      <div class="server-card selected" id="card-filelions" onclick="toggleServer('filelions')">
+        <div class="server-card-top">
+          <span class="server-card-name">FileLions</span>
+          <div class="custom-check" id="check-filelions">✓</div>
+        </div>
+        <div class="server-card-desc">HLS .m3u8 Stream</div>
+      </div>
+
+      <div class="server-card selected" id="card-vidhide" onclick="toggleServer('vidhide')">
+        <div class="server-card-top">
+          <span class="server-card-name">Vidhide</span>
+          <div class="custom-check" id="check-vidhide">✓</div>
+        </div>
+        <div class="server-card-desc">EarnVids HLS</div>
+      </div>
+
+      <div class="server-card" id="card-datanodes" onclick="toggleServer('datanodes')">
+        <div class="server-card-top">
+          <span class="server-card-name">DataNodes</span>
+          <div class="custom-check" id="check-datanodes"></div>
+        </div>
+        <div class="server-card-desc">Direct File Server</div>
+      </div>
     </div>
 
-    <div class="section-title">Batas Resolusi</div>
-    <select id="max-res" onchange="updateLinks()">
-      <option value="1080p">1080p (FHD - Rekomendasi)</option>
-      <option value="720p">720p (HD)</option>
-      <option value="480p">480p (SD)</option>
-    </select>
+    <!-- Section 3: Resolution -->
+    <div class="section-title">Batas Maksimal Resolusi</div>
+    <div class="res-tabs">
+      <button type="button" class="res-btn active" id="res-1080p" onclick="setResolution('1080p')">1080p (FHD)</button>
+      <button type="button" class="res-btn" id="res-720p" onclick="setResolution('720p')">720p (HD)</button>
+      <button type="button" class="res-btn" id="res-480p" onclick="setResolution('480p')">480p (SD)</button>
+    </div>
 
-    <div class="section-title">Opsi Tambahan</div>
-    <label class="toggle-row"><span>Tampilkan Kecepatan (🚀 Ping ms)</span><input type="checkbox" id="show-speed" checked onchange="updateLinks()"></label>
-    <label class="toggle-row"><span>Tampilkan Ukuran File (💾 Size)</span><input type="checkbox" id="show-size" checked onchange="updateLinks()"></label>
+    <!-- Section 4: Display Options -->
+    <div class="section-title">Opsi Informasi Stream</div>
+    <div class="switch-row">
+      <div>
+        <div class="switch-label">Kecepatan Server (Ping Latency)</div>
+        <div class="switch-desc">Tampilkan indikator respon server 🚀 ms di judul video</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle-speed" checked onchange="updateManifest()">
+        <span class="slider"></span>
+      </label>
+    </div>
 
-    <a id="btn-install" class="btn-install" href="#">INSTALL KE STREMIO</a>
-    <button type="button" class="btn-copy" onclick="copyManifest()">📋 Salin Link Manifest</button>
-    <div id="manifest-url" class="url-box"></div>
+    <div class="switch-row">
+      <div>
+        <div class="switch-label">Ukuran File (File Size / Bitrate)</div>
+        <div class="switch-desc">Tampilkan estimasi 💾 MB/GB atau Adaptive HLS</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle-size" checked onchange="updateManifest()">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Actions -->
+    <div class="install-box">
+      <a id="btn-install" class="btn-main" href="#">
+        <span>📥</span>
+        <span>INSTALL ADDON KE STREMIO</span>
+      </a>
+      <button type="button" class="btn-copy" onclick="copyManifestUrl()">
+        <span>📋</span>
+        <span>Salin Link Manifest</span>
+      </button>
+      <div id="url-preview" class="url-display"></div>
+    </div>
+
+    <!-- Guide -->
+    <details class="guide">
+      <summary>💡 Cara Pasang di Stremio (Web / PC / Android)</summary>
+      <div class="guide-content">
+        <ol>
+          <li><strong>Otomatis (PC & HP):</strong> Klik tombol <strong>INSTALL ADDON KE STREMIO</strong> di atas. Aplikasi Stremio akan terbuka otomatis.</li>
+          <li><strong>Manual (Stremio Web / Android TV):</strong> Klik <strong>Salin Link Manifest</strong> di atas. Di Stremio, buka menu <strong>Addons (🧩)</strong>, paste link ke kolom pencarian lalu tekan Enter.</li>
+        </ol>
+      </div>
+    </details>
 
     <div class="footer">
-      ⚠️ <strong>Educational & Research Use Only:</strong> Addon ini tidak meng-host atau menyimpan file video. Seluruh stream diperoleh langsung dari web pihak ketiga publik.
+      ⚠️ <strong>Educational & Research Use Only:</strong> Software ini beroperasi murni sebagai URL resolver publik dan tidak menyimpan atau men-stream media video apapun di server.
     </div>
   </div>
 
-  <script>
-    const host = window.location.host;
-    const proto = window.location.protocol;
+  <div id="toast" class="toast">Link manifest tersalin ke clipboard!</div>
 
-    function base64url(str) {
+  <script>
+    const state = {
+      servers: {
+        buzzheavier: true,
+        filelions: true,
+        vidhide: true,
+        datanodes: false,
+      },
+      maxResolution: '1080p',
+      showSpeed: true,
+      showSize: true,
+    };
+
+    // Parse initial config from query param or injected string
+    (function init() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const cfgParam = urlParams.get('config') || '${initialConfig}';
+        if (cfgParam) {
+          const json = atob(cfgParam.replace(/-/g, '+').replace(/_/g, '/'));
+          const parsed = JSON.parse(json);
+          if (parsed.servers) Object.assign(state.servers, parsed.servers);
+          if (parsed.maxResolution) state.maxResolution = parsed.maxResolution;
+          if (parsed.showSpeed !== undefined) state.showSpeed = parsed.showSpeed;
+          if (parsed.showSize !== undefined) state.showSize = parsed.showSize;
+        }
+      } catch (e) {}
+
+      // Sync DOM state
+      syncDom();
+      updateManifest();
+    })();
+
+    function syncDom() {
+      for (const [key, val] of Object.entries(state.servers)) {
+        const card = document.getElementById('card-' + key);
+        const check = document.getElementById('check-' + key);
+        if (card && check) {
+          if (val) {
+            card.classList.add('selected');
+            check.innerText = '✓';
+          } else {
+            card.classList.remove('selected');
+            check.innerText = '';
+          }
+        }
+      }
+
+      ['1080p', '720p', '480p'].forEach(res => {
+        const btn = document.getElementById('res-' + res);
+        if (btn) {
+          if (state.maxResolution === res) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+
+      const speedToggle = document.getElementById('toggle-speed');
+      if (speedToggle) speedToggle.checked = state.showSpeed;
+
+      const sizeToggle = document.getElementById('toggle-size');
+      if (sizeToggle) sizeToggle.checked = state.showSize;
+    }
+
+    function toggleServer(key) {
+      state.servers[key] = !state.servers[key];
+      syncDom();
+      updateManifest();
+    }
+
+    function setResolution(res) {
+      state.maxResolution = res;
+      syncDom();
+      updateManifest();
+    }
+
+    function toBase64Url(str) {
       return btoa(str).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');
     }
 
-    function updateLinks() {
-      const config = {
-        servers: {
-          buzzheavier: document.getElementById('srv-buzzheavier').checked,
-          filelions: document.getElementById('srv-filelions').checked,
-          vidhide: document.getElementById('srv-vidhide').checked,
-          datanodes: document.getElementById('srv-datanodes').checked,
-        },
-        maxResolution: document.getElementById('max-res').value,
-        showSpeed: document.getElementById('show-speed').checked,
-        showSize: document.getElementById('show-size').checked,
-      };
+    function updateManifest() {
+      const speedToggle = document.getElementById('toggle-speed');
+      const sizeToggle = document.getElementById('toggle-size');
+      if (speedToggle) state.showSpeed = speedToggle.checked;
+      if (sizeToggle) state.showSize = sizeToggle.checked;
 
-      const encoded = base64url(JSON.stringify(config));
+      const encoded = toBase64Url(JSON.stringify(state));
+      const host = window.location.host;
+      const proto = window.location.protocol;
+
       const httpUrl = proto + '//' + host + '/' + encoded + '/manifest.json';
       const stremioUrl = 'stremio://' + host + '/' + encoded + '/manifest.json';
 
       document.getElementById('btn-install').href = stremioUrl;
-      document.getElementById('manifest-url').innerText = httpUrl;
-      window.currentHttpUrl = httpUrl;
+      document.getElementById('url-preview').innerText = httpUrl;
+      window.currentManifestUrl = httpUrl;
     }
 
-    function copyManifest() {
-      if (window.currentHttpUrl) {
-        navigator.clipboard.writeText(window.currentHttpUrl).then(() => alert('Link manifest tersalin! Paste di pencarian Addon Stremio.'));
+    function copyManifestUrl() {
+      if (window.currentManifestUrl) {
+        navigator.clipboard.writeText(window.currentManifestUrl).then(() => {
+          showToast('Link manifest tersalin ke clipboard!');
+        }).catch(() => {
+          showToast('Silakan salin link manual di kotak bawah.');
+        });
       }
     }
 
-    updateLinks();
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
   </script>
 </body>
 </html>`;
 }
 
-// Landing & Configure Page: self-contained portal, or redirect to WEB_URL if configured
+// Landing & Configure Routes: self-contained portal
 app.get('/', (c) => c.html(renderConfigPage()));
 app.get('/configure', (c) => c.html(renderConfigPage()));
-app.get('/:config/configure', (c) => c.html(renderConfigPage()));
+app.get('/:config/configure', (c) => c.html(renderConfigPage(c.req.param('config'))));
 
 // Dual export: works for Bun server (port + fetch) and Cloudflare Workers (fetch)
 export default {
