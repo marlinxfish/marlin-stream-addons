@@ -29,7 +29,7 @@ describe('BuzzheavierResolver', () => {
     expect(result).not.toBeNull();
     expect(result?.url).toBe('https://cdn.buzzheavier.com/file/video.mp4');
     expect(result?.quality).toBe('1080p');
-    expect(result?.behaviorHints?.proxyHeaders?.request?.Referer).toBe('https://buzzheavier.com/');
+    expect(result?.behaviorHints?.notWebReady).toBe(false);
   });
 });
 
@@ -56,7 +56,7 @@ describe('VidhideResolver', () => {
     expect(result).not.toBeNull();
     expect(result?.url).toBe('https://stream.vidhide.com/hls/master.m3u8');
     expect(result?.quality).toBe('720p');
-    expect(result?.behaviorHints?.proxyHeaders?.request?.Referer).toBe('https://vidhidepro.com/');
+    expect(result?.behaviorHints?.notWebReady).toBe(false);
   });
 });
 
@@ -80,7 +80,7 @@ describe('DataNodesResolver', () => {
     expect(result).not.toBeNull();
     expect(result?.url).toBe('https://dl.datanodes.to/files/video.mp4');
     expect(result?.quality).toBe('1080p');
-    expect(result?.behaviorHints?.proxyHeaders?.request?.Referer).toBe('https://datanodes.to/');
+    expect(result?.behaviorHints?.notWebReady).toBe(false);
   });
 });
 

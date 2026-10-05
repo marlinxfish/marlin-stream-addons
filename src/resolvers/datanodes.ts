@@ -42,12 +42,7 @@ export class DataNodesResolver implements BaseResolver {
         server: 'DataNodes',
         latencyMs,
         behaviorHints: {
-          proxyHeaders: {
-            request: {
-              Referer: 'https://datanodes.to/',
-              'User-Agent': ua,
-            },
-          },
+          notWebReady: false,
         },
       };
     } catch {

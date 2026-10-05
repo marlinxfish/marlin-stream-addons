@@ -37,6 +37,7 @@ export class BuzzheavierResolver implements BaseResolver {
         signal: AbortSignal.timeout(this.timeoutMs),
       });
       const latencyMs = Math.round(performance.now() - start);
+      if (res.status === 403 || res.status === 503) return null;
 
       const location = res.headers.get('location');
       const directUrl = location || downloadUrl;
@@ -59,12 +60,7 @@ export class BuzzheavierResolver implements BaseResolver {
         latencyMs,
         sizeText,
         behaviorHints: {
-          proxyHeaders: {
-            request: {
-              Referer: 'https://buzzheavier.com/',
-              'User-Agent': ua,
-            },
-          },
+          notWebReady: false,
         },
       };
     } catch {

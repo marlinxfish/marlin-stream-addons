@@ -84,12 +84,7 @@ export class VidhideResolver implements BaseResolver {
         server: serverLabel,
         latencyMs,
         behaviorHints: {
-          proxyHeaders: {
-            request: {
-              Referer: `${origin}/`,
-              'User-Agent': ua,
-            },
-          },
+          notWebReady: false,
         },
       };
     } catch {
