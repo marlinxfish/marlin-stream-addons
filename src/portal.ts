@@ -19,9 +19,9 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
   <style>
     :root {
       --bg: #05070e;
-      --card-bg: rgba(13, 18, 32, 0.85);
+      --card-bg: rgba(13, 18, 32, 0.88);
       --card-border: rgba(255, 255, 255, 0.08);
-      --inner-bg: rgba(20, 27, 48, 0.6);
+      --inner-bg: rgba(20, 27, 48, 0.65);
       --inner-border: rgba(255, 255, 255, 0.07);
       --accent: #0ea5e9;
       --accent-hover: #38bdf8;
@@ -57,29 +57,29 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: 1.25rem 1.5rem;
       position: relative;
       background:
-        radial-gradient(900px circle at 50% 0%, rgba(14, 165, 233, 0.12), transparent 70%),
-        radial-gradient(700px circle at 85% 90%, rgba(139, 92, 246, 0.08), transparent 70%),
+        radial-gradient(1000px circle at 50% 0%, rgba(14, 165, 233, 0.14), transparent 70%),
+        radial-gradient(700px circle at 85% 90%, rgba(139, 92, 246, 0.09), transparent 70%),
         #05070e;
     }
 
-    /* Main Console Chassis */
+    /* Main Console Chassis with expansive width */
     .console {
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 980px;
+      max-width: 1180px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
+      border-radius: 22px;
       box-shadow:
         0 24px 64px -12px rgba(0, 0, 0, 0.8),
         0 0 0 1px rgba(255, 255, 255, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -87,7 +87,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     /* Console Top Header */
     .header {
-      padding: 0.95rem 1.5rem;
+      padding: 1.05rem 1.85rem;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
@@ -98,12 +98,12 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.8rem;
     }
 
     .brand-logo {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       background: linear-gradient(135deg, #0284c7, #8b5cf6);
       border-radius: 10px;
       display: flex;
@@ -114,14 +114,14 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     .brand-name {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
       letter-spacing: -0.02em;
       color: var(--text);
     }
 
     .brand-tag {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--accent);
       background: rgba(14, 165, 233, 0.12);
@@ -134,20 +134,20 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     .header-pills {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
     .pill {
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       font-weight: 500;
-      padding: 0.25rem 0.65rem;
+      padding: 0.3rem 0.75rem;
       border-radius: 999px;
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
     }
 
     .pill.active {
@@ -164,12 +164,12 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       box-shadow: 0 0 8px currentColor;
     }
 
-    /* Cockpit Body (2 Columns with optimal 1.15fr : 0.85fr ratio) */
+    /* Cockpit Body - Spacious 2 Columns */
     .cockpit {
-      padding: 1.35rem 1.5rem;
+      padding: 1.6rem 1.85rem;
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 1.5rem;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.85rem;
       align-items: stretch;
     }
 
@@ -177,17 +177,18 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 0.95rem;
+      gap: 1.1rem;
+      min-width: 0;
     }
 
     /* Section Component */
     .section-title {
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-sub);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.45rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -198,11 +199,12 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       position: relative;
       display: flex;
       align-items: center;
+      width: 100%;
     }
 
     .input-box svg.icon-left {
       position: absolute;
-      left: 0.85rem;
+      left: 0.95rem;
       color: var(--text-sub);
       pointer-events: none;
     }
@@ -211,9 +213,9 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       width: 100%;
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
-      border-radius: 10px;
-      padding: 0.65rem 2.2rem 0.65rem 2.4rem;
-      font-size: 0.84rem;
+      border-radius: 11px;
+      padding: 0.7rem 2.5rem 0.7rem 2.6rem;
+      font-size: 0.86rem;
       color: var(--text);
       outline: none;
       transition: all 0.2s ease;
@@ -222,26 +224,26 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     .access-input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
-      background: rgba(20, 28, 50, 0.8);
+      background: rgba(20, 28, 50, 0.85);
     }
 
     .btn-eye {
       position: absolute;
-      right: 0.75rem;
+      right: 0.85rem;
       background: none;
       border: none;
       color: var(--text-sub);
       cursor: pointer;
       display: flex;
       align-items: center;
-      padding: 0.2rem;
+      padding: 0.25rem;
     }
 
     .btn-eye:hover { color: var(--text); }
 
     .input-caption {
-      font-size: 0.7rem;
-      margin-top: 0.35rem;
+      font-size: 0.72rem;
+      margin-top: 0.4rem;
       display: flex;
       align-items: center;
       gap: 0.35rem;
@@ -256,17 +258,17 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       grid-template-columns: repeat(3, 1fr);
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
-      border-radius: 10px;
+      border-radius: 11px;
       padding: 0.25rem;
-      gap: 0.25rem;
+      gap: 0.3rem;
     }
 
     .seg-btn {
       background: none;
       border: none;
-      border-radius: 7px;
-      padding: 0.45rem 0.2rem;
-      font-size: 0.78rem;
+      border-radius: 8px;
+      padding: 0.5rem 0.3rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
@@ -282,25 +284,26 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       box-shadow: 0 2px 8px var(--accent-glow);
     }
 
-    /* Toggle Switches - Clean, spacious row */
+    /* Toggle Switches */
     .toggles-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.65rem;
+      gap: 0.75rem;
     }
 
     .toggle-item {
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
-      border-radius: 10px;
-      padding: 0.6rem 0.85rem;
+      border-radius: 11px;
+      padding: 0.65rem 0.95rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: 0.6rem;
       cursor: pointer;
       user-select: none;
       transition: border-color 0.2s;
+      min-width: 0;
     }
 
     .toggle-item:hover {
@@ -308,19 +311,19 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     .toggle-label {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 500;
       color: var(--text);
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
       white-space: nowrap;
     }
 
     .toggle-switch {
       position: relative;
-      width: 32px;
-      height: 18px;
+      width: 34px;
+      height: 19px;
       flex-shrink: 0;
     }
 
@@ -338,8 +341,8 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     .toggle-slider::before {
       content: "";
       position: absolute;
-      height: 14px;
-      width: 14px;
+      height: 15px;
+      width: 15px;
       left: 2px;
       bottom: 2px;
       background: #fff;
@@ -348,30 +351,30 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     input:checked + .toggle-slider { background: var(--accent); }
-    input:checked + .toggle-slider::before { transform: translateX(14px); }
+    input:checked + .toggle-slider::before { transform: translateX(15px); }
 
-    /* Sources list - Clean single-line items */
+    /* Sources list - Single line full-width cards */
     .sources-list {
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      gap: 0.5rem;
     }
 
     .source-row {
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
-      border-radius: 10px;
-      padding: 0.55rem 0.85rem;
+      border-radius: 11px;
+      padding: 0.6rem 0.95rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.75rem;
+      gap: 0.85rem;
     }
 
     .source-left {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.65rem;
       min-width: 0;
     }
 
@@ -392,24 +395,22 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     .source-name {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text);
       white-space: nowrap;
     }
 
     .source-desc {
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       color: var(--text-sub);
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .source-pill-badge {
-      font-size: 0.65rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      padding: 0.15rem 0.5rem;
+      padding: 0.15rem 0.55rem;
       border-radius: 5px;
       flex-shrink: 0;
     }
@@ -426,22 +427,23 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       color: var(--text-sub);
     }
 
-    /* RIGHT COLUMN: ACTION DOCK */
+    /* RIGHT COLUMN: EXPANSIVE ACTION DOCK */
     .action-panel {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 0.85rem;
+      gap: 1rem;
+      min-width: 0;
     }
 
     .action-box {
-      background: linear-gradient(145deg, rgba(14, 165, 233, 0.1), rgba(139, 92, 246, 0.08));
-      border: 1px solid rgba(14, 165, 233, 0.25);
-      border-radius: 14px;
-      padding: 1.15rem;
+      background: linear-gradient(145deg, rgba(14, 165, 233, 0.12), rgba(139, 92, 246, 0.08));
+      border: 1px solid rgba(14, 165, 233, 0.28);
+      border-radius: 15px;
+      padding: 1.35rem 1.45rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.85rem;
     }
 
     .action-header {
@@ -451,18 +453,18 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     .action-title {
-      font-size: 0.86rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: var(--text);
     }
 
     .action-badge {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: #38bdf8;
       background: rgba(14, 165, 233, 0.15);
       border: 1px solid rgba(14, 165, 233, 0.3);
-      padding: 0.15rem 0.5rem;
+      padding: 0.18rem 0.55rem;
       border-radius: 6px;
     }
 
@@ -471,13 +473,13 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #8b5cf6 100%);
       color: #fff;
       border: none;
-      border-radius: 10px;
-      padding: 0.85rem 1.2rem;
-      font-size: 0.88rem;
+      border-radius: 11px;
+      padding: 0.9rem 1.25rem;
+      font-size: 0.9rem;
       font-weight: 700;
       letter-spacing: 0.01em;
       text-decoration: none;
@@ -509,12 +511,12 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
-      border-radius: 9px;
-      padding: 0.6rem 0.9rem;
-      font-size: 0.78rem;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
@@ -533,17 +535,17 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       background: rgba(16, 185, 129, 0.08);
     }
 
+    /* URL Chip: Clean box with full break visibility */
     .url-chip {
       background: rgba(3, 7, 18, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      padding: 0.5rem 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9px;
+      padding: 0.6rem 0.85rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
+      line-height: 1.45;
       color: #7dd3fc;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      word-break: break-all;
       user-select: all;
     }
 
@@ -551,41 +553,41 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     .steps-card {
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
-      border-radius: 12px;
-      padding: 1rem 1.1rem;
+      border-radius: 14px;
+      padding: 1.15rem 1.35rem;
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
+      gap: 0.75rem;
       flex: 1;
       justify-content: center;
     }
 
     .steps-title {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--text);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
     }
 
     .step-item {
       display: flex;
       align-items: flex-start;
-      gap: 0.5rem;
-      font-size: 0.72rem;
+      gap: 0.6rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .step-num {
-      width: 18px;
-      height: 18px;
+      width: 19px;
+      height: 19px;
       border-radius: 50%;
       background: rgba(14, 165, 233, 0.15);
       border: 1px solid rgba(14, 165, 233, 0.3);
       color: #38bdf8;
-      font-size: 0.62rem;
+      font-size: 0.65rem;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -596,13 +598,13 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     /* Footer */
     .footer {
-      padding: 0.65rem 1.5rem;
+      padding: 0.7rem 1.85rem;
       border-top: 1px solid var(--card-border);
       background: rgba(255, 255, 255, 0.01);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       color: var(--text-sub);
     }
 
@@ -617,8 +619,8 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       color: #f8fafc;
       font-size: 0.78rem;
       font-weight: 600;
-      padding: 0.5rem 1.1rem;
-      border-radius: 8px;
+      padding: 0.55rem 1.2rem;
+      border-radius: 9px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--accent-glow);
       opacity: 0;
       pointer-events: none;
@@ -626,7 +628,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       z-index: 999;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.45rem;
     }
 
     .toast.show {
@@ -635,24 +637,24 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     /* Responsive Mobile Breakpoint */
-    @media (max-width: 820px) {
+    @media (max-width: 860px) {
       body { padding: 0.5rem; }
       .console { border-radius: 14px; max-height: 98dvh; }
-      .header { padding: 0.65rem 0.9rem; }
-      .brand-logo { width: 28px; height: 28px; }
-      .brand-name { font-size: 0.9rem; }
+      .header { padding: 0.75rem 1rem; }
+      .brand-logo { width: 30px; height: 30px; }
+      .brand-name { font-size: 0.95rem; }
       .header-pills { display: none; }
       .cockpit {
         grid-template-columns: 1fr;
-        padding: 0.85rem;
-        gap: 0.75rem;
+        padding: 0.95rem;
+        gap: 0.85rem;
         overflow-y: auto;
       }
-      .col { gap: 0.65rem; }
+      .col { gap: 0.75rem; }
       .sources-list { display: none; }
       .steps-card { display: none; }
-      .action-box { padding: 0.85rem; gap: 0.6rem; }
-      .btn-cta { padding: 0.75rem; font-size: 0.82rem; }
+      .action-box { padding: 0.95rem; gap: 0.65rem; }
+      .btn-cta { padding: 0.8rem; font-size: 0.85rem; }
       .footer { display: none; }
     }
   </style>
@@ -663,7 +665,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     <header class="header">
       <div class="brand">
         <div class="brand-logo">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/>
             <rect x="2" y="6" width="14" height="12" rx="3"/>
           </svg>
@@ -695,12 +697,12 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
         <div>
           <div class="section-title">
             <span>Sandi Akses Keluarga</span>
-            <span id="key-badge" style="font-size: 0.65rem; color: ${isKeyRequired ? '#fb7185' : '#34d399'}; font-weight: 600;">
+            <span id="key-badge" style="font-size: 0.68rem; color: ${isKeyRequired ? '#fb7185' : '#34d399'}; font-weight: 600;">
               ${isKeyRequired ? '🔒 Wajib Diisi' : '🔓 Publik'}
             </span>
           </div>
           <div class="input-box">
-            <svg class="icon-left" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="icon-left" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
             </svg>
@@ -714,7 +716,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
               spellcheck="false"
             />
             <button type="button" class="btn-eye" onclick="toggleKeyVisibility()" title="Lihat kata sandi">
-              <svg id="eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg id="eye-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
@@ -729,7 +731,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
         <div>
           <div class="section-title">
             <span>Maksimal Resolusi</span>
-            <span id="res-badge" style="font-size: 0.68rem; color: #38bdf8; font-weight: 600; text-transform: none;">1080p FHD</span>
+            <span id="res-badge" style="font-size: 0.7rem; color: #38bdf8; font-weight: 600; text-transform: none;">1080p FHD</span>
           </div>
           <div class="segmented">
             <button type="button" class="seg-btn active" id="res-1080p" onclick="setResolution('1080p')">1080p</button>
@@ -744,7 +746,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           <div class="toggles-group">
             <label class="toggle-item">
               <span class="toggle-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
                 <span>Latency ms</span>
@@ -756,7 +758,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
             </label>
             <label class="toggle-item">
               <span class="toggle-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                 </svg>
                 <span>Ukuran MB</span>
@@ -769,7 +771,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           </div>
         </div>
 
-        <!-- Active Sources (Clean Horizontal Rows) -->
+        <!-- Active Sources (Spacious Single-line Rows) -->
         <div>
           <div class="section-title">Sumber Indexer Aktif</div>
           <div class="sources-list">
@@ -777,7 +779,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
               <div class="source-left">
                 <span class="source-dot ${options.nontonAnimeIdEnabled ? 'on' : 'off'}"></span>
                 <span class="source-name">NontonAnimeID</span>
-                <span class="source-desc">• Anime & Kitsu</span>
+                <span class="source-desc">• Anime & Kitsu Sub Indo</span>
               </div>
               <span class="source-pill-badge ${options.nontonAnimeIdEnabled ? 'on' : 'off'}">
                 ${options.nontonAnimeIdEnabled ? 'Aktif' : 'Off'}
@@ -797,7 +799,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
         </div>
       </div>
 
-      <!-- Right Column: Stremio Action Card -->
+      <!-- Right Column: Expansive Stremio Action Card -->
       <div class="col action-panel">
         <div class="action-box">
           <div class="action-header">
@@ -806,7 +808,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           </div>
 
           <a id="btn-install" href="#" class="btn-cta">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" x2="12" y1="15" y2="3"/>
@@ -815,7 +817,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           </a>
 
           <button type="button" id="btn-copy" class="btn-secondary" onclick="copyManifestUrl()">
-            <svg id="copy-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg id="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
               <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
             </svg>
@@ -825,10 +827,10 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           <div id="url-preview" class="url-chip">Menyiapkan link manifest...</div>
         </div>
 
-        <!-- Quick Steps (Tightly balanced) -->
+        <!-- Quick Steps (Spacious & Clear) -->
         <div class="steps-card">
           <div class="steps-title">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <line x1="12" x2="12" y1="16" y2="12"/>
               <line x1="12" x2="12.01" y1="8" y2="8"/>
@@ -837,15 +839,15 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           </div>
           <div class="step-item">
             <span class="step-num">1</span>
-            <span><strong>Otomatis:</strong> Klik tombol di atas untuk sinkronisasi ke aplikasi Stremio langsung.</span>
+            <span><strong>Otomatis:</strong> Klik tombol biru di atas untuk sinkronisasi otomatis ke aplikasi Stremio langsung.</span>
           </div>
           <div class="step-item">
             <span class="step-num">2</span>
-            <span><strong>Manual di TV/HP:</strong> Salin link manifest di atas, paste ke menu Addons di Stremio.</span>
+            <span><strong>Manual di TV / HP:</strong> Salin link manifest di atas, paste ke kotak Addons di aplikasi Stremio.</span>
           </div>
           <div class="step-item">
             <span class="step-num">3</span>
-            <span><strong>Katalog:</strong> Putar judul dari Kitsu (Anime) atau Oppadrama, stream otomatis muncul.</span>
+            <span><strong>Pencarian:</strong> Putar judul dari Kitsu (Anime) atau Oppadrama, stream otomatis muncul.</span>
           </div>
         </div>
       </div>
