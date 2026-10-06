@@ -14,23 +14,28 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <title>Marlin Stream - Konfigurasi Addon</title>
+  <title>Marlin Stream - Stremio Addon</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <style>
     :root {
-      --bg: #060911;
-      --card: rgba(13, 19, 34, 0.82);
-      --card-inner: rgba(20, 29, 52, 0.55);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-focus: #0ea5e9;
-      --primary: #0ea5e9;
-      --primary-hover: #0284c7;
-      --primary-glow: rgba(14, 165, 233, 0.25);
-      --success: #10b981;
+      --bg: #05070e;
+      --card-bg: rgba(13, 18, 32, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --inner-bg: rgba(18, 25, 44, 0.55);
+      --inner-border: rgba(255, 255, 255, 0.06);
+      --accent: #0ea5e9;
+      --accent-hover: #38bdf8;
+      --accent-glow: rgba(14, 165, 233, 0.3);
+      --purple: #8b5cf6;
+      --purple-glow: rgba(139, 92, 246, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --rose: #f43f5e;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --text-sub: #64748b;
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -38,6 +43,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
+
     html, body {
       height: 100dvh;
       max-height: 100dvh;
@@ -47,171 +53,182 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      background:
-        radial-gradient(900px circle at 50% -10%, rgba(14, 165, 233, 0.15), transparent 70%),
-        radial-gradient(700px circle at 85% 100%, rgba(99, 102, 241, 0.08), transparent 70%),
-        #060911;
-      padding: 0.65rem 0.85rem;
-    }
-    .app-shell {
-      width: 100%;
-      max-width: 1020px;
-      height: 100%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 0.55rem;
-    }
 
-    /* Top Navigation Bar */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.45rem 0.8rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 0.85rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      flex-shrink: 0;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .brand-icon {
-      width: 2rem;
-      height: 2rem;
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(99, 102, 241, 0.35));
-      border: 1px solid rgba(14, 165, 233, 0.4);
-      border-radius: 0.55rem;
+    body {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #38bdf8;
+      padding: 1rem;
+      position: relative;
+      background:
+        radial-gradient(800px circle at 50% 0%, rgba(14, 165, 233, 0.12), transparent 70%),
+        radial-gradient(600px circle at 85% 90%, rgba(139, 92, 246, 0.08), transparent 70%),
+        #05070e;
     }
-    .brand-title {
-      font-size: 0.92rem;
+
+
+    /* Main Console Chassis */
+    .console {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 940px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow:
+        0 24px 64px -12px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Console Top Header */
+    .header {
+      padding: 0.9rem 1.4rem;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #0284c7, #8b5cf6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--accent-glow);
+      color: #fff;
+    }
+
+    .brand-name {
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
       color: var(--text);
     }
-    .brand-badge {
-      font-size: 0.62rem;
-      padding: 0.12rem 0.4rem;
-      border-radius: 0.35rem;
-      background: rgba(14, 165, 233, 0.15);
-      border: 1px solid rgba(14, 165, 233, 0.3);
-      color: #38bdf8;
+
+    .brand-tag {
+      font-size: 0.68rem;
       font-weight: 600;
+      color: var(--accent);
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      margin-left: 0.4rem;
     }
-    .header-badges {
+
+    .header-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 0.4rem;
     }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.7rem;
-      font-weight: 500;
-      padding: 0.2rem 0.55rem;
-      border-radius: 0.45rem;
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-    }
-    .chip.green {
-      border-color: rgba(16, 185, 129, 0.3);
-      color: #34d399;
+
+    .pill.active {
       background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: #34d399;
     }
-    .dot {
-      width: 0.38rem;
-      height: 0.38rem;
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: currentColor;
+      box-shadow: 0 0 8px currentColor;
     }
 
-    /* Main Cockpit Grid */
+    /* Cockpit Body (2 Columns) */
     .cockpit {
-      flex: 1;
+      padding: 1.25rem 1.4rem;
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 0.55rem;
-      min-height: 0;
-    }
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 0.95rem;
-      padding: 0.85rem 1rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 0;
-      gap: 0.55rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: stretch;
     }
 
-    /* Section Components */
-    .panel-section {
+    .col {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 1rem;
     }
-    .sec-label {
-      font-size: 0.7rem;
+
+    /* Section Component */
+    .section-title {
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-sub);
+      margin-bottom: 0.4rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    /* Input Element */
-    .input-wrapper {
+    /* Key Input */
+    .input-box {
       position: relative;
       display: flex;
       align-items: center;
     }
-    .input-icon {
+
+    .input-box svg.icon-left {
       position: absolute;
-      left: 0.7rem;
+      left: 0.85rem;
       color: var(--text-sub);
       pointer-events: none;
-      display: flex;
-      align-items: center;
     }
-    .text-input {
+
+    .access-input {
       width: 100%;
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 0.6rem;
-      padding: 0.55rem 2rem 0.55rem 2.1rem;
-      font-size: 0.82rem;
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      border-radius: 10px;
+      padding: 0.65rem 2.2rem 0.65rem 2.4rem;
+      font-size: 0.84rem;
       color: var(--text);
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: all 0.2s ease;
     }
-    .text-input:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px var(--primary-glow);
+
+    .access-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(20, 28, 50, 0.8);
     }
-    .toggle-visibility-btn {
+
+    .btn-eye {
       position: absolute;
-      right: 0.6rem;
+      right: 0.75rem;
       background: none;
       border: none;
       color: var(--text-sub);
@@ -220,342 +237,417 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       align-items: center;
       padding: 0.2rem;
     }
-    .toggle-visibility-btn:hover { color: var(--text); }
-    .key-state-text {
-      font-size: 0.68rem;
-      color: var(--text-sub);
-      margin-top: 0.1rem;
-    }
-    .key-state-text.req { color: #fb7185; }
-    .key-state-text.ok { color: #34d399; }
 
-    /* Segmented Control (Resolution) */
-    .segmented-control {
+    .btn-eye:hover { color: var(--text); }
+
+    .input-caption {
+      font-size: 0.7rem;
+      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .input-caption.warn { color: #fb7185; }
+    .input-caption.ok { color: #34d399; }
+
+    /* Segmented Control */
+    .segmented {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 0.6rem;
-      padding: 0.18rem;
-      gap: 0.2rem;
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      border-radius: 10px;
+      padding: 0.25rem;
+      gap: 0.25rem;
     }
+
     .seg-btn {
       background: none;
       border: none;
-      border-radius: 0.45rem;
-      padding: 0.4rem 0.2rem;
-      color: var(--text-muted);
-      font-size: 0.75rem;
+      border-radius: 7px;
+      padding: 0.45rem 0.2rem;
+      font-size: 0.78rem;
       font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
       text-align: center;
     }
+
     .seg-btn:hover { color: var(--text); }
+
     .seg-btn.active {
-      background: var(--primary);
+      background: var(--accent);
       color: #fff;
-      box-shadow: 0 2px 8px var(--primary-glow);
+      box-shadow: 0 2px 8px var(--accent-glow);
     }
 
-    /* Toggle Switches (Speed, Size) */
-    .toggles-row {
+    /* Toggle Switches in a clean card */
+    .toggles-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.45rem;
+      gap: 0.5rem;
     }
-    .toggle-card {
+
+    .toggle-item {
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 0.6rem;
-      padding: 0.45rem 0.6rem;
       cursor: pointer;
       user-select: none;
+      transition: border-color 0.2s;
     }
-    .toggle-card:hover { border-color: rgba(255, 255, 255, 0.15); }
-    .toggle-info {
+
+    .toggle-item:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .toggle-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text);
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      font-size: 0.75rem;
-      color: var(--text);
-      font-weight: 500;
+      gap: 0.45rem;
     }
-    .switch {
+
+    .toggle-switch {
       position: relative;
-      width: 2rem;
-      height: 1.1rem;
+      width: 32px;
+      height: 18px;
       flex-shrink: 0;
     }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(255, 255, 255, 0.12);
-      transition: .2s;
-      border-radius: 1rem;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 0.8rem;
-      width: 0.8rem;
-      left: 0.15rem;
-      bottom: 0.15rem;
-      background-color: white;
-      transition: .2s;
-      border-radius: 50%;
-    }
-    input:checked + .slider { background-color: var(--primary); }
-    input:checked + .slider:before { transform: translateX(0.9rem); }
 
-    /* Sources Mini Grid */
-    .sources-grid {
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    input:checked + .toggle-slider { background: var(--accent); }
+    input:checked + .toggle-slider::before { transform: translateX(14px); }
+
+    /* Sources list */
+    .sources-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.4rem;
-    }
-    .source-pill {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 0.55rem;
-      padding: 0.4rem 0.55rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .source-pill-name {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .source-pill-sub {
-      font-size: 0.61rem;
-      color: var(--text-sub);
-    }
-    .source-badge {
-      font-size: 0.6rem;
-      font-weight: 600;
-      padding: 0.1rem 0.35rem;
-      border-radius: 0.35rem;
-      background: rgba(16, 185, 129, 0.12);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-    .source-badge.off {
-      background: rgba(148, 163, 184, 0.1);
-      color: var(--text-sub);
-      border-color: rgba(148, 163, 184, 0.2);
+      gap: 0.5rem;
     }
 
-    /* Right Action Panel */
-    .action-panel {
+    .source-card {
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      border-radius: 10px;
+      padding: 0.5rem 0.7rem;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: space-between;
-      gap: 0.55rem;
     }
-    .cta-card {
-      background: linear-gradient(145deg, rgba(14, 165, 233, 0.12), rgba(99, 102, 241, 0.08));
-      border: 1px solid rgba(14, 165, 233, 0.3);
-      border-radius: 0.85rem;
-      padding: 0.85rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-    }
-    .btn-install {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.45rem;
-      background: linear-gradient(135deg, #0284c7, #0ea5e9);
-      color: #fff;
-      border: none;
-      border-radius: 0.65rem;
-      padding: 0.75rem 0.9rem;
-      font-size: 0.84rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      text-decoration: none;
-      cursor: pointer;
-      box-shadow: 0 4px 14px var(--primary-glow);
-      transition: all 0.2s ease;
-    }
-    .btn-install:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.4);
-    }
-    .btn-install:active { transform: translateY(0); }
-    .btn-install.disabled {
-      opacity: 0.35 !important;
-      pointer-events: none !important;
-      filter: grayscale(0.6);
-    }
-    .btn-copy {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.45rem;
-      background: var(--card-inner);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: 0.6rem;
-      padding: 0.5rem 0.75rem;
+
+    .source-name {
       font-size: 0.75rem;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn-copy:hover {
       color: var(--text);
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
     }
-    .btn-copy.copied {
-      border-color: var(--success);
+
+    .source-meta {
+      font-size: 0.65rem;
+      color: var(--text-sub);
+    }
+
+    .badge-on {
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       color: #34d399;
     }
-    .manifest-box {
-      background: rgba(3, 7, 18, 0.75);
+
+    .badge-off {
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(100, 116, 139, 0.15);
+      border: 1px solid rgba(100, 116, 139, 0.25);
+      color: var(--text-sub);
+    }
+
+    /* RIGHT COLUMN: ACTION DOCK */
+    .action-box {
+      background: linear-gradient(145deg, rgba(14, 165, 233, 0.1), rgba(139, 92, 246, 0.08));
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      border-radius: 14px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .action-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .action-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .action-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #38bdf8;
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    /* Big CTA Button */
+    .btn-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #8b5cf6 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow:
+        0 6px 20px var(--accent-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 26px rgba(14, 165, 233, 0.45);
+      filter: brightness(1.08);
+    }
+
+    .btn-cta:active {
+      transform: translateY(1px);
+    }
+
+    .btn-cta.disabled {
+      opacity: 0.35 !important;
+      pointer-events: none !important;
+      filter: grayscale(0.8);
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      border-radius: 9px;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    .btn-secondary.copied {
+      border-color: var(--emerald);
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .url-chip {
+      background: rgba(3, 7, 18, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 0.5rem;
-      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.66rem;
-      color: #93c5fd;
+      font-size: 0.7rem;
+      color: #7dd3fc;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       user-select: all;
     }
 
-    /* Quick Guide Box */
-    .guide-box {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 0.7rem 0.8rem;
+    /* Stremio Instruction Card */
+    .steps-card {
+      background: var(--inner-bg);
+      border: 1px solid var(--inner-border);
+      border-radius: 12px;
+      padding: 0.9rem;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.6rem;
     }
-    .guide-title {
-      font-size: 0.72rem;
+
+    .steps-title {
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--text);
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
-    .guide-steps {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-    .guide-step {
+
+    .step-item {
       display: flex;
       align-items: flex-start;
-      gap: 0.4rem;
-      font-size: 0.7rem;
-      line-height: 1.35;
+      gap: 0.5rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
+      line-height: 1.4;
     }
+
     .step-num {
-      width: 1rem;
-      height: 1rem;
+      width: 17px;
+      height: 17px;
       border-radius: 50%;
       background: rgba(14, 165, 233, 0.15);
       border: 1px solid rgba(14, 165, 233, 0.3);
       color: #38bdf8;
-      font-size: 0.58rem;
+      font-size: 0.62rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      margin-top: 0.05rem;
+      margin-top: 1px;
     }
 
-    /* Bottom Mini Footer */
-    .bottom-bar {
-      text-align: center;
-      font-size: 0.64rem;
+    /* Footer */
+    .footer {
+      padding: 0.6rem 1.4rem;
+      border-top: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.01);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.68rem;
       color: var(--text-sub);
-      padding: 0.1rem 0;
-      flex-shrink: 0;
     }
+
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer a:hover { color: var(--accent); }
 
     /* Toast */
     .toast {
       position: fixed;
-      bottom: 1.25rem;
+      bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: #0f172a;
-      border: 1px solid var(--primary);
+      border: 1px solid var(--accent);
       color: #f8fafc;
-      font-size: 0.76rem;
-      font-weight: 500;
-      padding: 0.45rem 0.9rem;
-      border-radius: 0.55rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 15px var(--primary-glow);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--accent-glow);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 999;
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
+
     .toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Mobile Responsive Adaptation */
+    /* Responsive Mobile Breakpoint */
     @media (max-width: 780px) {
-      body { padding: 0.45rem 0.55rem; }
-      .app-shell { gap: 0.4rem; }
-      .top-bar { padding: 0.35rem 0.55rem; }
-      .brand-title { font-size: 0.82rem; }
+      body { padding: 0.5rem; }
+      .console { border-radius: 14px; max-height: 98dvh; }
+      .header { padding: 0.65rem 0.9rem; }
+      .brand-logo { width: 28px; height: 28px; }
+      .brand-name { font-size: 0.9rem; }
+      .header-pills { display: none; }
       .cockpit {
         grid-template-columns: 1fr;
-        gap: 0.4rem;
+        padding: 0.85rem;
+        gap: 0.75rem;
+        overflow-y: auto;
       }
-      .panel { padding: 0.65rem 0.75rem; gap: 0.45rem; }
-      .sources-grid { display: none; }
-      .guide-box { display: none; }
-      .btn-install { padding: 0.65rem 0.8rem; font-size: 0.8rem; }
-      .bottom-bar { display: none; }
+      .col { gap: 0.65rem; }
+      .sources-row { display: none; }
+      .steps-card { display: none; }
+      .action-box { padding: 0.85rem; gap: 0.6rem; }
+      .btn-cta { padding: 0.75rem; font-size: 0.82rem; }
+      .footer { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <!-- Top Bar -->
-    <header class="top-bar">
+  <div class="console">
+    <!-- Top Header -->
+    <header class="header">
       <div class="brand">
-        <div class="brand-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="brand-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/>
             <rect x="2" y="6" width="14" height="12" rx="3"/>
           </svg>
         </div>
-        <span class="brand-title">Marlin Stream Addons</span>
-        <span class="brand-badge">v${version}</span>
+        <div>
+          <span class="brand-name">Marlin Stream</span>
+          <span class="brand-tag">v${version}</span>
+        </div>
       </div>
-      <div class="header-badges">
-        <span class="chip green">
-          <span class="dot"></span>
+      <div class="header-pills">
+        <span class="pill active">
+          <span class="status-dot"></span>
           <span>${activeSourcesCount} Provider Aktif</span>
         </span>
-        <span class="chip">
+        <span class="pill">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
@@ -566,118 +658,122 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     <!-- Cockpit Body -->
     <main class="cockpit">
-      <!-- Left Panel: Parameters -->
-      <section class="panel">
-        <!-- Access Key -->
-        <div class="panel-section">
-          <label class="sec-label" for="access-key-input">
-            <span>Kunci Akses Keluarga</span>
-            <span id="key-badge" class="source-badge ${isKeyRequired ? '' : 'off'}">${isKeyRequired ? 'Wajib' : 'Publik'}</span>
-          </label>
-          <div class="input-wrapper">
-            <div class="input-icon">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </div>
+      <!-- Left Column: Controls -->
+      <div class="col">
+        <!-- Access Key Card -->
+        <div>
+          <div class="section-title">
+            <span>Sandi Akses Keluarga</span>
+            <span id="key-badge" style="font-size: 0.65rem; color: ${isKeyRequired ? '#fb7185' : '#34d399'}; font-weight: 600;">
+              ${isKeyRequired ? '🔒 Wajib Diisi' : '🔓 Publik'}
+            </span>
+          </div>
+          <div class="input-box">
+            <svg class="icon-left" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
             <input
               type="password"
               id="access-key-input"
-              class="text-input"
-              placeholder="${isKeyRequired ? 'Ketik Access Key keluarga...' : 'Opsional: Server terbuka untuk umum'}"
+              class="access-input"
+              placeholder="${isKeyRequired ? 'Masukkan Access Key keluarga...' : 'Opsional: Server terbuka untuk umum'}"
               oninput="setAccessKey(this.value)"
               autocomplete="off"
               spellcheck="false"
             />
-            <button type="button" class="toggle-visibility-btn" onclick="toggleKeyVisibility()" title="Lihat sandi">
+            <button type="button" class="btn-eye" onclick="toggleKeyVisibility()" title="Lihat kata sandi">
               <svg id="eye-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
             </button>
           </div>
-          <div id="key-feedback" class="key-state-text ${isKeyRequired ? 'req' : ''}">
-            ${isKeyRequired ? '⚠️ Masukkan sandi untuk mengaktifkan tombol install.' : '✓ Server dapat diakses tanpa kata sandi.'}
+          <div id="key-caption" class="input-caption ${isKeyRequired ? 'warn' : 'ok'}">
+            ${isKeyRequired ? '⚠️ Masukkan sandi untuk membuka link install.' : '✓ Siap dipasang tanpa kata sandi.'}
           </div>
         </div>
 
-        <!-- Resolution -->
-        <div class="panel-section">
-          <div class="sec-label">
-            <span>Batas Resolusi Maksimal</span>
-            <span id="res-indicator" style="color: #38bdf8; font-size: 0.66rem; text-transform: none;">1080p FHD</span>
+        <!-- Resolution Selector -->
+        <div>
+          <div class="section-title">
+            <span>Maksimal Resolusi</span>
+            <span id="res-badge" style="font-size: 0.68rem; color: #38bdf8; font-weight: 600; text-transform: none;">1080p FHD</span>
           </div>
-          <div class="segmented-control">
+          <div class="segmented">
             <button type="button" class="seg-btn active" id="res-1080p" onclick="setResolution('1080p')">1080p</button>
             <button type="button" class="seg-btn" id="res-720p" onclick="setResolution('720p')">720p</button>
             <button type="button" class="seg-btn" id="res-480p" onclick="setResolution('480p')">480p</button>
           </div>
         </div>
 
-        <!-- Toggles -->
-        <div class="panel-section">
-          <div class="sec-label">Informasi Tampilan Stream</div>
-          <div class="toggles-row">
-            <label class="toggle-card">
-              <div class="toggle-info">
+        <!-- Stream Information Toggles -->
+        <div>
+          <div class="section-title">Informasi Tampilan Stream</div>
+          <div class="toggles-group">
+            <label class="toggle-item">
+              <span class="toggle-label">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
                 <span>Latency ms</span>
-              </div>
-              <div class="switch">
+              </span>
+              <span class="toggle-switch">
                 <input type="checkbox" id="toggle-speed" checked onchange="updateManifest()">
-                <span class="slider"></span>
-              </div>
+                <span class="toggle-slider"></span>
+              </span>
             </label>
-            <label class="toggle-card">
-              <div class="toggle-info">
+            <label class="toggle-item">
+              <span class="toggle-label">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                 </svg>
                 <span>Ukuran MB</span>
-              </div>
-              <div class="switch">
+              </span>
+              <span class="toggle-switch">
                 <input type="checkbox" id="toggle-size" checked onchange="updateManifest()">
-                <span class="slider"></span>
-              </div>
+                <span class="toggle-slider"></span>
+              </span>
             </label>
           </div>
         </div>
 
-        <!-- Sources -->
-        <div class="panel-section">
-          <div class="sec-label">Provider Indexer</div>
-          <div class="sources-grid">
-            <div class="source-pill">
+        <!-- Active Sources -->
+        <div>
+          <div class="section-title">Sumber Indexer Aktif</div>
+          <div class="sources-row">
+            <div class="source-card">
               <div>
-                <div class="source-pill-name">NontonAnimeID</div>
-                <div class="source-pill-sub">Anime & Kitsu Sub Indo</div>
+                <div class="source-name">NontonAnimeID</div>
+                <div class="source-meta">Anime & Kitsu Sub Indo</div>
               </div>
-              <span class="source-badge ${options.nontonAnimeIdEnabled ? '' : 'off'}">${options.nontonAnimeIdEnabled ? 'Aktif' : 'Off'}</span>
+              <span class="${options.nontonAnimeIdEnabled ? 'badge-on' : 'badge-off'}">
+                ${options.nontonAnimeIdEnabled ? 'Aktif' : 'Off'}
+              </span>
             </div>
-            <div class="source-pill">
+            <div class="source-card">
               <div>
-                <div class="source-pill-name">Oppadrama</div>
-                <div class="source-pill-sub">Drama & Movie Asia</div>
+                <div class="source-name">Oppadrama</div>
+                <div class="source-meta">Drama & Movie Asia</div>
               </div>
-              <span class="source-badge ${options.oppadramaEnabled ? '' : 'off'}">${options.oppadramaEnabled ? 'Aktif' : 'Off'}</span>
+              <span class="${options.oppadramaEnabled ? 'badge-on' : 'badge-off'}">
+                ${options.oppadramaEnabled ? 'Aktif' : 'Off'}
+              </span>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- Right Panel: Activation Dock -->
-      <section class="panel action-panel">
-        <div class="cta-card">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 0.76rem; font-weight: 700; color: var(--text);">Pasang ke Stremio</span>
-            <span style="font-size: 0.64rem; color: #38bdf8; background: rgba(14, 165, 233, 0.15); padding: 0.12rem 0.4rem; border-radius: 0.35rem; font-weight: 600;">1-Klik Sync</span>
+      <!-- Right Column: Stremio Action Card -->
+      <div class="col">
+        <div class="action-box">
+          <div class="action-header">
+            <span class="action-title">Aktivasi ke Stremio</span>
+            <span class="action-badge">1-Klik Sync</span>
           </div>
 
-          <a id="btn-install" href="#" class="btn-install">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <a id="btn-install" href="#" class="btn-cta">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" x2="12" y1="15" y2="3"/>
@@ -685,7 +781,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
             <span>INSTALL ADDON KE STREMIO</span>
           </a>
 
-          <button type="button" id="btn-copy" class="btn-copy" onclick="copyManifestUrl()">
+          <button type="button" id="btn-copy" class="btn-secondary" onclick="copyManifestUrl()">
             <svg id="copy-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
               <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
@@ -693,48 +789,48 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
             <span id="copy-text">Salin Link Manifest</span>
           </button>
 
-          <div id="url-preview" class="manifest-box">Menyiapkan link manifest...</div>
+          <div id="url-preview" class="url-chip">Menyiapkan link manifest...</div>
         </div>
 
-        <!-- Quick Guide -->
-        <div class="guide-box">
-          <div class="guide-title">
+        <!-- Quick Steps -->
+        <div class="steps-card">
+          <div class="steps-title">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <line x1="12" x2="12" y1="16" y2="12"/>
               <line x1="12" x2="12.01" y1="8" y2="8"/>
             </svg>
-            <span>Panduan Pasang Cepat</span>
+            <span>Panduan Pasang Stremio</span>
           </div>
-          <ul class="guide-steps">
-            <li class="guide-step">
-              <span class="step-num">1</span>
-              <span><strong>Otomatis:</strong> Klik tombol biru di atas untuk membuka aplikasi Stremio langsung.</span>
-            </li>
-            <li class="guide-step">
-              <span class="step-num">2</span>
-              <span><strong>Manual di TV/HP:</strong> Salin link manifest di atas, paste ke kolom Addons di Stremio.</span>
-            </li>
-            <li class="guide-step">
-              <span class="step-num">3</span>
-              <span><strong>Katalog Kitsu:</strong> Putar judul anime dari Kitsu Catalog, stream otomatis muncul.</span>
-            </li>
-          </ul>
+          <div class="step-item">
+            <span class="step-num">1</span>
+            <span><strong>Otomatis:</strong> Klik tombol biru di atas untuk membuka aplikasi Stremio langsung.</span>
+          </div>
+          <div class="step-item">
+            <span class="step-num">2</span>
+            <span><strong>Manual di TV/HP:</strong> Salin link manifest di atas, paste ke menu Addons di Stremio.</span>
+          </div>
+          <div class="step-item">
+            <span class="step-num">3</span>
+            <span><strong>Katalog:</strong> Putar judul dari Kitsu (Anime) atau Oppadrama, stream otomatis muncul.</span>
+          </div>
         </div>
-      </section>
+      </div>
     </main>
 
-    <!-- Bottom Bar -->
-    <footer class="bottom-bar">
-      Educational & research indexer • Tidak menyimpan atau menghosting file media apapun
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Zero-bandwidth direct streaming indexer</span>
+      <span>Tidak menyimpan file media di server</span>
     </footer>
   </div>
 
+  <!-- Toast Feedback -->
   <div id="toast" class="toast">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
       <polyline points="20 6 9 17 4 12"/>
     </svg>
-    <span id="toast-text">Link manifest tersalin ke clipboard!</span>
+    <span id="toast-msg">Link manifest tersalin ke clipboard!</span>
   </div>
 
   <script>
@@ -772,10 +868,10 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           else btn.classList.remove('active');
         }
       });
-      const ind = document.getElementById('res-indicator');
-      if (ind) {
+      const badge = document.getElementById('res-badge');
+      if (badge) {
         const labelMap = { '1080p': '1080p FHD', '720p': '720p HD', '480p': '480p SD' };
-        ind.innerText = labelMap[state.maxResolution] || state.maxResolution;
+        badge.innerText = labelMap[state.maxResolution] || state.maxResolution;
       }
 
       const speedToggle = document.getElementById('toggle-speed');
@@ -796,14 +892,14 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     function setAccessKey(val) {
       state.key = val.trim();
-      const feedback = document.getElementById('key-feedback');
+      const caption = document.getElementById('key-caption');
       if (requiresKey) {
         if (state.key.length > 0) {
-          feedback.className = 'key-state-text ok';
-          feedback.innerText = '✓ Kunci terisi. Tombol install diaktifkan.';
+          caption.className = 'input-caption ok';
+          caption.innerText = '✓ Sandi terisi. Tombol install siap.';
         } else {
-          feedback.className = 'key-state-text req';
-          feedback.innerText = '⚠️ Masukkan sandi untuk mengaktifkan tombol install.';
+          caption.className = 'input-caption warn';
+          caption.innerText = '⚠️ Masukkan sandi untuk membuka link install.';
         }
       }
       updateManifest();
@@ -826,7 +922,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
       if (requiresKey && !state.key) {
         btnInstall.classList.add('disabled');
-        urlPreview.innerText = 'Ketik Access Key di atas untuk membuka link addon.';
+        urlPreview.innerText = 'Ketik sandi akses untuk membuat link...';
         window.currentManifestUrl = '';
         return;
       }
@@ -850,7 +946,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     function copyManifestUrl() {
       if (!window.currentManifestUrl) {
-        showToast('Isi Access Key terlebih dahulu!');
+        showToast('Isi Sandi Akses terlebih dahulu!');
         return;
       }
       navigator.clipboard.writeText(window.currentManifestUrl).then(() => {
@@ -864,13 +960,13 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           if (txt) txt.innerText = 'Salin Link Manifest';
         }, 2000);
       }).catch(() => {
-        showToast('Gagal menyalin otomatis, salin dari kotak teks.');
+        showToast('Gagal menyalin otomatis, salin dari kotak.');
       });
     }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
-      const text = document.getElementById('toast-text');
+      const text = document.getElementById('toast-msg');
       if (text) text.innerText = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2500);
