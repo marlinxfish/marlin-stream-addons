@@ -1,9 +1,11 @@
 import { config } from './config';
 import { OppadramaProvider } from './providers/oppadrama';
+import { NontonAnimeIDProvider } from './providers/nontonanimeid';
 import { ProviderRegistry } from './providers/registry';
 import { defaultResolverRegistry } from './resolvers/registry';
 import { cacheService } from './services/cache';
 import { cinemetaService } from './services/cinemeta';
+import { kitsuService } from './services/kitsu';
 import type { MediaType, StreamResult } from './types';
 import { decodeConfigParam, filterStreamsByConfig } from './services/config-filter';
 import { parseDownloadLinks } from './providers/oppadrama/parser';
@@ -14,7 +16,7 @@ export const manifest = {
   name: 'Marlin Stream Addons',
   description: 'Educational stream resolver indexer for Stremio. Zero-bandwidth direct streaming from public sources. Does not host or store any media.',
   resources: ['catalog', 'meta', 'stream'],
-  types: ['movie', 'series'],
+  types: ['movie', 'series', 'anime'],
   catalogs: [
     {
       type: 'series',
@@ -35,7 +37,7 @@ export const manifest = {
       ],
     },
   ],
-  idPrefixes: ['tt', 'oppa:'],
+  idPrefixes: ['tt', 'oppa:', 'kitsu:'],
   behaviorHints: {
     configurable: true,
   },
@@ -46,6 +48,9 @@ export const manifest = {
 export const providerRegistry = new ProviderRegistry();
 if (config.oppadramaEnabled) {
   providerRegistry.register(new OppadramaProvider(config.oppadramaBaseUrl, defaultResolverRegistry));
+}
+if (config.nontonAnimeIdEnabled) {
+  providerRegistry.register(new NontonAnimeIDProvider(config.nontonAnimeIdBaseUrl, defaultResolverRegistry));
 }
 
 export async function resolveStreams({
@@ -68,6 +73,7 @@ export async function resolveStreams({
         const slug = id.slice(5);
         const targetUrl = `${config.oppadramaBaseUrl}/${slug}/`;
         const res = await safeFetch(targetUrl);
+
         if (!res.ok) return [];
 
         const html = await res.text();
@@ -110,10 +116,15 @@ export async function resolveStreams({
             streams.push(item.value);
           }
         }
+      } else if (id.startsWith('kitsu:')) {
+        const meta = await kitsuService.lookup(type, id);
+
+        if (!meta) return [];
+        streams = await providerRegistry.getAllStreams(meta);
+
       } else {
         const meta = await cinemetaService.lookup(type, id);
         if (!meta) return [];
-
         streams = await providerRegistry.getAllStreams(meta);
       }
 
@@ -121,6 +132,7 @@ export async function resolveStreams({
         cacheService.setStream(cacheKey, streams);
       }
     }
+
 
     return filterStreamsByConfig(streams || [], userConfig);
   } catch (err) {

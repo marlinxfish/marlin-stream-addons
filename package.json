@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun run src/index.ts",
+    "tunnel": "bunx cloudflared tunnel --url http://localhost:7000",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "bun test",

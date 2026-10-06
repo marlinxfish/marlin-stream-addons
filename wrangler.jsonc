@@ -7,8 +7,10 @@
     "nodejs_compat"
   ],
   "vars": {
-    "PROVIDER_OPPADRAMA_ENABLED": "false",
-    "OPPADRAMA_BASE_URL": "http://212.86.121.175.nip.io",
+    "PROVIDER_OPPADRAMA_ENABLED": "true",
+    "OPPADRAMA_BASE_URL": "http://212.86.121.175",
+    "PROVIDER_NONTONANIMEID_ENABLED": "true",
+    "NONTONANIMEID_BASE_URL": "https://s13.nontonanimeid.boats",
     "ADDON_NAME": "Marlin Stream",
     "ADDON_ICON": "🐟",
     "REQUEST_TIMEOUT_MS": "6000",

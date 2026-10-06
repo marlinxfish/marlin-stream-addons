@@ -6,6 +6,7 @@ import { cacheService } from './services/cache';
 import { catalogService } from './services/catalog';
 import type { MediaType } from './types';
 
+
 export const app = new Hono();
 
 // Private Network Access (PNA) and universal CORS headers
@@ -236,44 +237,6 @@ function renderConfigPage(initialConfig = '') {
     .status-tag.green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
     .status-tag.gray { background: rgba(255, 255, 255, 0.06); color: var(--text-sub); }
 
-    /* Servers grid */
-    .servers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-    .server-card {
-      background: #0b0f1a;
-      border: 1px solid var(--card-border);
-      border-radius: 0.9rem;
-      padding: 0.85rem;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 4.5rem;
-    }
-    .server-card:hover { background: var(--card-hover); border-color: rgba(255,255,255,0.15); }
-    .server-card.selected {
-      background: rgba(6, 182, 212, 0.08);
-      border-color: rgba(6, 182, 212, 0.5);
-      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.1);
-    }
-    .server-card-top { display: flex; align-items: center; justify-content: space-between; }
-    .server-card-name { font-size: 0.82rem; font-weight: 700; color: #fff; }
-    .server-card-desc { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.4rem; }
-    .custom-check {
-      width: 1.1rem;
-      height: 1.1rem;
-      border-radius: 0.35rem;
-      border: 1.5px solid var(--card-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: #fff;
-      transition: all 0.15s;
-    }
-    .server-card.selected .custom-check { background: var(--primary); border-color: var(--primary); }
-
     /* Resolution tabs */
     .res-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; background: #0b0f1a; padding: 0.3rem; border-radius: 0.85rem; border: 1px solid var(--card-border); }
     .res-btn {
@@ -461,11 +424,11 @@ function renderConfigPage(initialConfig = '') {
         </div>
         <div class="badges-row">
           <span class="pill active">🟢 Edge Ready</span>
+          <span class="pill">🦊 Kitsu Anime</span>
+          <span class="pill">🎌 NontonAnimeID</span>
           <span class="pill">⚡ Zero-Bandwidth</span>
-          <span class="pill">🇮🇩 Sub Indo (HC)</span>
-          <span class="pill">🔍 Search & Catalog</span>
+          <span class="pill">🇮🇩 Sub Indo</span>
         </div>
-      </div>
     </div>
 
     <div class="dashboard-grid">
@@ -474,10 +437,30 @@ function renderConfigPage(initialConfig = '') {
         <!-- Section 1: Data Sources -->
         <div class="section-title">
           <span>Sumber Providers</span>
-          <span class="count">1 Aktif</span>
+          <span class="count">${(config.nontonAnimeIdEnabled ? 1 : 0) + (config.oppadramaEnabled ? 1 : 0)} Aktif</span>
         </div>
         <div class="provider-box">
+          <div class="provider-card ${config.nontonAnimeIdEnabled ? 'active' : ''}">
+            <div class="provider-info">
+              <span class="icon">🎌</span>
+              <div>
+                <div class="name">NontonAnimeID</div>
+                <div class="sub">Anime Series & Movie Sub Indo</div>
+              </div>
+            </div>
+            <span class="status-tag ${config.nontonAnimeIdEnabled ? 'green' : 'gray'}">${config.nontonAnimeIdEnabled ? 'Aktif' : 'Nonaktif'}</span>
+          </div>
           <div class="provider-card active">
+            <div class="provider-info">
+              <span class="icon">🦊</span>
+              <div>
+                <div class="name">Anime Kitsu</div>
+                <div class="sub">Metadata & Catalog Stremio</div>
+              </div>
+            </div>
+            <span class="status-tag green">Terhubung</span>
+          </div>
+          <div class="provider-card ${config.oppadramaEnabled ? 'active' : ''}">
             <div class="provider-info">
               <span class="icon">🍿</span>
               <div>
@@ -485,59 +468,13 @@ function renderConfigPage(initialConfig = '') {
                 <div class="sub">Drama & Movie Asia</div>
               </div>
             </div>
-            <span class="status-tag green">Aktif</span>
-          </div>
-          <div class="provider-card">
-            <div class="provider-info">
-              <span class="icon">🌐</span>
-              <div>
-                <div class="name">Provider Lain</div>
-                <div class="sub">LK21, Rebahin, dll</div>
-              </div>
-            </div>
-            <span class="status-tag gray">Segera</span>
+            <span class="status-tag ${config.oppadramaEnabled ? 'green' : 'gray'}">${config.oppadramaEnabled ? 'Aktif' : 'Offline'}</span>
           </div>
         </div>
-
-        <!-- Section 2: Video Servers -->
-        <div class="section-title">
-          <span>Pilihan Server Video</span>
-          <span class="count">Klik untuk aktifkan</span>
+        <div style="margin-top: 0.85rem; padding: 0.75rem 1rem; border-radius: 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; color: #34d399; display: flex; align-items: center; gap: 0.5rem;">
+          <span>⚡</span>
+          <span><strong>Server Otomatis:</strong> Semua server video (KotakVideo, Vidhide, dll) aktif otomatis dan siap diputar.</span>
         </div>
-        <div class="servers-grid">
-          <div class="server-card selected" id="card-buzzheavier" onclick="toggleServer('buzzheavier')">
-            <div class="server-card-top">
-              <span class="server-card-name">Buzzheavier</span>
-              <div class="custom-check" id="check-buzzheavier">✓</div>
-            </div>
-            <div class="server-card-desc">Direct MP4 1080p</div>
-          </div>
-
-          <div class="server-card selected" id="card-filelions" onclick="toggleServer('filelions')">
-            <div class="server-card-top">
-              <span class="server-card-name">FileLions</span>
-              <div class="custom-check" id="check-filelions">✓</div>
-            </div>
-            <div class="server-card-desc">HLS .m3u8 Stream</div>
-          </div>
-
-          <div class="server-card selected" id="card-vidhide" onclick="toggleServer('vidhide')">
-            <div class="server-card-top">
-              <span class="server-card-name">Vidhide</span>
-              <div class="custom-check" id="check-vidhide">✓</div>
-            </div>
-            <div class="server-card-desc">EarnVids HLS</div>
-          </div>
-
-          <div class="server-card" id="card-datanodes" onclick="toggleServer('datanodes')">
-            <div class="server-card-top">
-              <span class="server-card-name">DataNodes</span>
-              <div class="custom-check" id="check-datanodes"></div>
-            </div>
-            <div class="server-card-desc">Direct File Server</div>
-          </div>
-        </div>
-
         <!-- Section 3: Resolution -->
         <div class="section-title">Batas Maksimal Resolusi</div>
         <div class="res-tabs">
@@ -591,12 +528,12 @@ function renderConfigPage(initialConfig = '') {
 
           <!-- Guide -->
           <details class="guide" open>
-            <summary>💡 Cara Pasang & Cari Film di Stremio</summary>
+            <summary>💡 Cara Pasang & Cari Anime di Stremio</summary>
             <div class="guide-content">
               <ol>
                 <li><strong>Otomatis (PC & HP):</strong> Klik tombol <strong>INSTALL ADDON KE STREMIO</strong> di atas untuk membuka aplikasi Stremio langsung.</li>
-                <li><strong>Pencarian Film:</strong> Di kolom search bar Stremio, ketik judul drama/film (misal: <em>Against the Current</em> atau <em>One Night Only</em>). Judul dari Oppadrama akan langsung muncul lengkap dengan poster!</li>
-                <li><strong>Discover Catalog:</strong> Buka menu <strong>Discover</strong> di Stremio, pilih katalog <strong>Marlin - Oppadrama Series</strong> atau <strong>Movies</strong> untuk menjelajahi update episode terbaru.</li>
+                <li><strong>Integrasi Kitsu Addon:</strong> Kamu bisa gunakan katalog plugin resmi <strong>Anime Kitsu</strong> di Stremio. Saat memutar episode/movie anime dari Kitsu, stream dari <strong>NontonAnimeID</strong> akan otomatis tersedia!</li>
+                <li><strong>Pencarian Judul Anime:</strong> Kamu juga bisa langsung mencari judul anime di search bar Stremio (misal: <em>Solo Leveling</em> atau <em>Jujutsu Kaisen 0</em>).</li>
               </ol>
             </div>
           </details>
@@ -613,12 +550,6 @@ function renderConfigPage(initialConfig = '') {
 
   <script>
     const state = {
-      servers: {
-        buzzheavier: true,
-        filelions: true,
-        vidhide: true,
-        datanodes: false,
-      },
       maxResolution: '1080p',
       showSpeed: true,
       showSize: true,
@@ -632,7 +563,6 @@ function renderConfigPage(initialConfig = '') {
         if (cfgParam) {
           const json = atob(cfgParam.replace(/-/g, '+').replace(/_/g, '/'));
           const parsed = JSON.parse(json);
-          if (parsed.servers) Object.assign(state.servers, parsed.servers);
           if (parsed.maxResolution) state.maxResolution = parsed.maxResolution;
           if (parsed.showSpeed !== undefined) state.showSpeed = parsed.showSpeed;
           if (parsed.showSize !== undefined) state.showSize = parsed.showSize;
@@ -644,20 +574,6 @@ function renderConfigPage(initialConfig = '') {
     })();
 
     function syncDom() {
-      for (const [key, val] of Object.entries(state.servers)) {
-        const card = document.getElementById('card-' + key);
-        const check = document.getElementById('check-' + key);
-        if (card && check) {
-          if (val) {
-            card.classList.add('selected');
-            check.innerText = '✓';
-          } else {
-            card.classList.remove('selected');
-            check.innerText = '';
-          }
-        }
-      }
-
       ['1080p', '720p', '480p'].forEach(res => {
         const btn = document.getElementById('res-' + res);
         if (btn) {
@@ -671,12 +587,6 @@ function renderConfigPage(initialConfig = '') {
 
       const sizeToggle = document.getElementById('toggle-size');
       if (sizeToggle) sizeToggle.checked = state.showSize;
-    }
-
-    function toggleServer(key) {
-      state.servers[key] = !state.servers[key];
-      syncDom();
-      updateManifest();
     }
 
     function setResolution(res) {

@@ -1,15 +1,15 @@
 import { config } from '../config';
-import { StreamResult } from '../types';
+import { FetchFunction, StreamResult } from '../types';
 import { getRandomUserAgent } from '../utils/http';
 import { BaseResolver } from './base';
 
 export class VidhideResolver implements BaseResolver {
   readonly name = 'Vidhide';
-  private fetchFn: typeof fetch;
+  private fetchFn: FetchFunction;
   private timeoutMs: number;
 
-  constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
-    this.fetchFn = (input, init) => fetchFn(input, init);
+  constructor(fetchFn: FetchFunction = fetch, timeoutMs: number = config.requestTimeoutMs) {
+    this.fetchFn = fetchFn;
     this.timeoutMs = timeoutMs;
   }
   canResolve(url: string): boolean {
@@ -43,22 +43,17 @@ export class VidhideResolver implements BaseResolver {
       const html = await res.text();
       let streamUrl: string | null = null;
 
-      // Check Dean Edwards packer
+      // Check Dean Edwards packer safely without eval/new Function
       const marker = 'eval(function(p,a,c,k,e,d)';
       const markerStart = html.indexOf(marker);
       if (markerStart !== -1) {
         const end = html.indexOf(".split('|')))", markerStart);
         if (end !== -1) {
           const block = html.slice(markerStart, end + 13);
-          try {
-            const fn = new Function(block.replace(/^eval/, 'return'));
-            const unpacked = fn();
-            const m3u8Match = unpacked.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
-            if (m3u8Match) {
-              streamUrl = m3u8Match[1];
-            }
-          } catch {
-            // fallback to regex on raw html
+          const unpacked = unpackDeanEdwards(block);
+          const m3u8Match = unpacked.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
+          if (m3u8Match) {
+            streamUrl = m3u8Match[1];
           }
         }
       }
@@ -90,5 +85,35 @@ export class VidhideResolver implements BaseResolver {
     } catch {
       return null;
     }
+  }
+}
+
+export function unpackDeanEdwards(packed: string): string {
+  try {
+    const match = packed.match(/}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/);
+    if (!match) return '';
+    let p = match[1].slice(1, -1);
+    p = p.replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+    const a = parseInt(match[2], 10);
+    const k = match[4].slice(1, -1).split('|');
+
+    const unbase = (val: string, base: number): number => {
+      const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      if (base <= 36) return parseInt(val, base);
+      let res = 0;
+      for (let i = 0; i < val.length; i++) {
+        const idx = chars.indexOf(val[i]);
+        if (idx === -1) return -1;
+        res = res * base + idx;
+      }
+      return res;
+    };
+
+    return p.replace(/\b\w+\b/g, (w) => {
+      const idx = unbase(w, a);
+      return idx >= 0 && idx < k.length && k[idx] ? k[idx] : w;
+    });
+  } catch {
+    return '';
   }
 }

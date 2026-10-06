@@ -3,7 +3,7 @@ import { BaseResolver } from './base';
 import { BuzzheavierResolver } from './buzzheavier';
 import { DataNodesResolver } from './datanodes';
 import { VidhideResolver } from './vidhide';
-
+import { KotakanimeResolver } from './kotakanime';
 export class ResolverRegistry {
   private resolvers: BaseResolver[] = [];
 
@@ -30,3 +30,4 @@ export const defaultResolverRegistry = new ResolverRegistry();
 defaultResolverRegistry.register(new BuzzheavierResolver());
 defaultResolverRegistry.register(new VidhideResolver());
 defaultResolverRegistry.register(new DataNodesResolver());
+defaultResolverRegistry.register(new KotakanimeResolver());

@@ -58,6 +58,22 @@ describe('VidhideResolver', () => {
     expect(result?.quality).toBe('720p');
     expect(result?.behaviorHints?.notWebReady).toBe(false);
   });
+
+  it('unpacks Dean Edwards packed m3u8 script without eval', async () => {
+    const packed = `
+      <html>
+        <script>
+          eval(function(p,a,c,k,e,d){return p}('1 0="2://3/4/master.5";',6,6,'player|var|https|cdn.vidhide.com|video|m3u8'.split('|')))
+        </script>
+      </html>
+    `;
+    const mockFetch = mock(async () => new Response(packed, { status: 200 }));
+    const resolver = new VidhideResolver(mockFetch as unknown as typeof fetch);
+
+    const result = await resolver.resolve('https://vidhidepro.com/d/packed123', '720p');
+    expect(result).not.toBeNull();
+    expect(result?.url).toBe('https://cdn.vidhide.com/video/master.m3u8');
+  });
 });
 
 describe('DataNodesResolver', () => {

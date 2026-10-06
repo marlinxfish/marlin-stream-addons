@@ -25,19 +25,8 @@ export function getRandomUserAgent(): string {
   return USER_AGENTS[index];
 }
 
-export function toSafeFetchUrl(rawUrl: string): { fetchUrl: string; hostHeader?: string } {
-  try {
-    const urlObj = new URL(rawUrl);
-    const ipMatch = urlObj.hostname.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:\.nip\.io)?$/);
-    if (ipMatch) {
-      const rawIp = ipMatch[1];
-      urlObj.hostname = `${rawIp}.nip.io`;
-      return { fetchUrl: urlObj.href, hostHeader: rawIp };
-    }
-    return { fetchUrl: rawUrl, hostHeader: urlObj.host };
-  } catch {
-    return { fetchUrl: rawUrl, hostHeader: undefined };
-  }
+export function toSafeFetchUrl(rawUrl: string): { fetchUrl: string } {
+  return { fetchUrl: rawUrl };
 }
 
 export function getBrowserHeaders(referer?: string, defaultHost?: string): Record<string, string> {
@@ -56,9 +45,6 @@ export function getBrowserHeaders(referer?: string, defaultHost?: string): Recor
     'Upgrade-Insecure-Requests': '1',
   };
 
-  if (defaultHost) {
-    headers['Host'] = defaultHost;
-  }
 
   if (referer) {
     headers['Referer'] = referer.replace(/\.nip\.io/g, '');
@@ -69,17 +55,13 @@ export function getBrowserHeaders(referer?: string, defaultHost?: string): Recor
 
 export async function fetchWithSpoof(url: string, options: FetchSpoofOptions = {}): Promise<SpoofedResponse> {
   const timeoutMs = options.timeoutMs || config.requestTimeoutMs;
-  const { fetchUrl, hostHeader } = toSafeFetchUrl(url);
-  const browserHeaders = getBrowserHeaders(options.referer, options.defaultHost || hostHeader);
+  const { fetchUrl } = toSafeFetchUrl(url);
+  const browserHeaders = getBrowserHeaders(options.referer);
 
   const mergedHeaders = {
     ...browserHeaders,
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
-
-  if (hostHeader) {
-    mergedHeaders['Host'] = hostHeader;
-  }
   const fetchInit: RequestInit & { proxy?: string } = {
     ...options,
     headers: mergedHeaders,
@@ -97,7 +79,8 @@ export async function fetchWithSpoof(url: string, options: FetchSpoofOptions = {
   return { response, latencyMs };
 }
 
-export async function safeFetch(url: string, init: RequestInit = {}): Promise<Response> {
-  const { response } = await fetchWithSpoof(url, init);
+export async function safeFetch(url: string | URL | Request, init: RequestInit = {}): Promise<Response> {
+  const urlStr = typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+  const { response } = await fetchWithSpoof(urlStr, init);
   return response;
 }

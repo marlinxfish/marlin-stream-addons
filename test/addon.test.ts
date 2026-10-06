@@ -12,8 +12,10 @@ describe('Stremio Addon Definition', () => {
     expect(manifest.resources).toContain('meta');
     expect(manifest.types).toContain('movie');
     expect(manifest.types).toContain('series');
+    expect(manifest.types).toContain('anime');
     expect(manifest.catalogs.length).toBeGreaterThan(0);
     expect(manifest.idPrefixes).toContain('oppa:');
+    expect(manifest.idPrefixes).toContain('kitsu:');
   });
 
   it('handles stream requests returning clean streams array', async () => {
@@ -33,7 +35,7 @@ describe('Stremio Addon Definition', () => {
   it('serves manifest and stream through configured Hono routes', async () => {
     const manifestRes = await app.request('/someconfig/manifest.json');
     expect(manifestRes.status).toBe(200);
-    const manifestData = await manifestRes.json();
+    const manifestData = (await manifestRes.json()) as { id?: string };
     expect(manifestData.id).toBe('community.movieaddons.stream');
 
     // Test stream endpoint
@@ -43,20 +45,29 @@ describe('Stremio Addon Definition', () => {
 
     const streamRes = await app.request('/someconfig/stream/movie/tt_route_test.json');
     expect(streamRes.status).toBe(200);
-    const streamData = await streamRes.json();
+    const streamData = (await streamRes.json()) as { streams?: { name?: string }[] };
     expect(streamData.streams).toHaveLength(1);
     expect(streamData.streams?.[0]?.name).toBe('TestServer');
 
+    // Test kitsu stream route
+    cacheService.setStream('stream:series:kitsu:12:1', [
+      { name: 'KitsuAnimeStream', title: 'Ep 1', url: 'https://cdn.example.com/anime.mp4' },
+    ]);
+    const kitsuRes = await app.request('/stream/series/kitsu:12:1.json');
+    expect(kitsuRes.status).toBe(200);
+    const kitsuData = (await kitsuRes.json()) as { streams?: { name?: string }[] };
+    expect(kitsuData.streams).toHaveLength(1);
+    expect(kitsuData.streams?.[0]?.name).toBe('KitsuAnimeStream');
     // Test catalog endpoint
     const catRes = await app.request('/catalog/series/marlin_series/search=dummy.json');
     expect(catRes.status).toBe(200);
-    const catData = await catRes.json();
+    const catData = (await catRes.json()) as { metas?: unknown[] };
     expect(Array.isArray(catData.metas)).toBe(true);
 
     // Test meta endpoint
     const metaRes = await app.request('/meta/series/oppa:unknown.json');
     expect(metaRes.status).toBe(200);
-    const metaData = await metaRes.json();
+    const metaData = (await metaRes.json()) as { meta?: unknown };
     expect(metaData.meta).toBeDefined();
   });
 });

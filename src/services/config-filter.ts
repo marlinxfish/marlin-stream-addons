@@ -1,12 +1,6 @@
 import type { StreamResult } from '../types';
 
 export interface UserConfigPayload {
-  servers?: {
-    buzzheavier?: boolean;
-    filelions?: boolean;
-    vidhide?: boolean;
-    datanodes?: boolean;
-  };
   maxResolution?: '1080p' | '720p' | '480p';
   showSpeed?: boolean;
   showSize?: boolean;
@@ -35,14 +29,6 @@ export function filterStreamsByConfig(
 
   return streams
     .filter((stream) => {
-      // Check server toggle
-      if (config.servers && stream.server) {
-        const serverKey = stream.server.toLowerCase();
-        if (config.servers.buzzheavier === false && serverKey.includes('buzzheavier')) return false;
-        if (config.servers.filelions === false && serverKey.includes('filelions')) return false;
-        if (config.servers.vidhide === false && serverKey.includes('vidhide')) return false;
-        if (config.servers.datanodes === false && serverKey.includes('datanodes')) return false;
-      }
 
       // Check resolution limit
       if (config.maxResolution && stream.quality) {

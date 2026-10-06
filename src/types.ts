@@ -1,9 +1,11 @@
-export type MediaType = 'movie' | 'series';
-
+export type MediaType = 'movie' | 'series' | 'anime';
+export type FetchFunction = (input: string | Request | URL, init?: RequestInit) => Promise<Response>;
 export interface MediaItemQuery {
-  imdbId: string;
+  imdbId?: string;
+  kitsuId?: string;
   type: MediaType;
   title: string;
+  titles?: string[];
   year?: number;
   season?: number;
   episode?: number;

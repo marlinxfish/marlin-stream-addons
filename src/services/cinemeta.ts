@@ -1,12 +1,12 @@
 import { config } from '../config';
-import { MediaItemQuery, MediaType } from '../types';
+import { FetchFunction, MediaItemQuery, MediaType } from '../types';
 
 export class CinemetaService {
-  private fetchFn: typeof fetch;
+  private fetchFn: FetchFunction;
   private timeoutMs: number;
 
-  constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
-    this.fetchFn = (input, init) => fetchFn(input, init);
+  constructor(fetchFn: FetchFunction = fetch, timeoutMs: number = config.requestTimeoutMs) {
+    this.fetchFn = fetchFn;
     this.timeoutMs = timeoutMs;
   }
 
@@ -19,8 +19,12 @@ export class CinemetaService {
       const season = seasonNum !== undefined && !Number.isNaN(seasonNum) ? seasonNum : undefined;
       const episode = episodeNum !== undefined && !Number.isNaN(episodeNum) ? episodeNum : undefined;
 
-      const url = `https://v3-cinemeta.strem.io/meta/${type}/${imdbId}.json`;
-      const res = await this.fetchFn(url, { signal: AbortSignal.timeout(this.timeoutMs) });
+      const cinemetaType = type === 'anime' ? (season !== undefined ? 'series' : 'movie') : type;
+      const url = `https://v3-cinemeta.strem.io/meta/${cinemetaType}/${imdbId}.json`;
+      const res = await this.fetchFn(url, {
+        headers: { 'User-Agent': 'MarlinStreamAddon/1.0', 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
       let data: { meta?: { name?: string; year?: string | number } } | null = null;
       if (res.ok) {
         data = (await res.json()) as { meta?: { name?: string; year?: string | number } };
@@ -32,7 +36,10 @@ export class CinemetaService {
 
       if (!data?.meta?.name && ID_ALIASES[imdbId]) {
         const aliasUrl = `https://v3-cinemeta.strem.io/meta/${type}/${ID_ALIASES[imdbId]}.json`;
-        const aliasRes = await this.fetchFn(aliasUrl, { signal: AbortSignal.timeout(this.timeoutMs) });
+        const aliasRes = await this.fetchFn(aliasUrl, {
+          headers: { 'User-Agent': 'MarlinStreamAddon/1.0', 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(this.timeoutMs),
+        });
         if (aliasRes.ok) {
           data = (await aliasRes.json()) as { meta?: { name?: string; year?: string | number } };
         }

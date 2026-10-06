@@ -1,6 +1,6 @@
 import { config } from '../../config';
 import { ResolverRegistry } from '../../resolvers/registry';
-import { MediaItemQuery, StreamResult } from '../../types';
+import { FetchFunction, MediaItemQuery, StreamResult } from '../../types';
 import { getBrowserHeaders, safeFetch } from '../../utils/http';
 import { BaseProvider } from '../base';
 import {
@@ -15,18 +15,18 @@ export class OppadramaProvider implements BaseProvider {
   readonly name = 'Oppadrama';
   readonly baseUrl: string;
   private resolverRegistry: ResolverRegistry;
-  private fetchFn: typeof fetch;
+  private fetchFn: FetchFunction;
   private timeoutMs: number;
 
   constructor(
     baseUrl: string,
     resolverRegistry: ResolverRegistry,
-    fetchFn: typeof fetch = safeFetch,
+    fetchFn: FetchFunction = safeFetch,
     timeoutMs: number = config.requestTimeoutMs
   ) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.resolverRegistry = resolverRegistry;
-    this.fetchFn = (input, init) => fetchFn(input, init);
+    this.fetchFn = fetchFn;
     this.timeoutMs = timeoutMs;
   }
 

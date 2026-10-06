@@ -11,17 +11,15 @@ describe('Config Filter Service in Backend', () => {
     { name: 'OppaDrama\n480p', title: 'Stream 4', url: 'http://cdn4', server: 'Buzzheavier', quality: '480p' },
   ];
 
-  it('filters out disabled servers', () => {
+  it('always keeps all servers active regardless of server preferences', () => {
     const config = {
-      servers: { buzzheavier: false, filelions: true, vidhide: true, datanodes: false },
       maxResolution: '1080p' as const,
       showSpeed: true,
       showSize: true,
     };
 
     const filtered = filterStreamsByConfig(sampleStreams, config);
-    expect(filtered.length).toBe(2);
-    expect(filtered.every(s => s.server !== 'Buzzheavier')).toBe(true);
+    expect(filtered.length).toBe(4);
   });
 
   it('filters out resolutions higher than maxResolution', () => {
@@ -65,7 +63,6 @@ describe('Config Filter Service in Backend', () => {
   it('applies config filter via addon stream handler', async () => {
     cacheService.setStream('stream:movie:tt_filter_test', sampleStreams);
     const configPayload = {
-      servers: { buzzheavier: false, filelions: true, vidhide: true, datanodes: true },
       maxResolution: '720p' as const,
       showSpeed: true,
       showSize: true,
@@ -73,9 +70,8 @@ describe('Config Filter Service in Backend', () => {
     const encoded = Buffer.from(JSON.stringify(configPayload)).toString('base64url');
 
     const streams = await resolveStreams({ type: 'movie', id: 'tt_filter_test', config: encoded });
-    expect(streams).toHaveLength(1);
-    expect(streams[0].server).toBe('FileLions');
-    expect(streams[0].quality).toBe('720p');
+    expect(streams).toHaveLength(2);
+    expect(streams.every(s => s.quality !== '1080p')).toBe(true);
   });
   it('strips speed and size from title when showSpeed or showSize is false', () => {
     const rawStreams: StreamResult[] = [

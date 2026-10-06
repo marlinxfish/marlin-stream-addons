@@ -2,6 +2,8 @@ export interface AppConfig {
   port: number;
   oppadramaBaseUrl: string;
   oppadramaEnabled: boolean;
+  nontonAnimeIdBaseUrl: string;
+  nontonAnimeIdEnabled: boolean;
   cacheStreamTtl: number;
   cacheMetaTtl: number;
   requestTimeoutMs: number;
@@ -15,6 +17,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     port: Number(env.PORT) || 7000,
     oppadramaBaseUrl: (env.OPPADRAMA_BASE_URL || 'http://212.86.121.175').replace(/\/+$/, ''),
     oppadramaEnabled: env.PROVIDER_OPPADRAMA_ENABLED !== 'false',
+    nontonAnimeIdBaseUrl: (env.NONTONANIMEID_BASE_URL || 'https://s13.nontonanimeid.boats').replace(/\/+$/, ''),
+    nontonAnimeIdEnabled: env.PROVIDER_NONTONANIMEID_ENABLED !== 'false',
     cacheStreamTtl: Number(env.CACHE_STREAM_TTL) || 3600,
     cacheMetaTtl: Number(env.CACHE_META_TTL) || 86400,
     requestTimeoutMs: Number(env.REQUEST_TIMEOUT_MS) || 6000,

@@ -1,15 +1,15 @@
 import { config } from '../config';
-import { StreamResult } from '../types';
+import { FetchFunction, StreamResult } from '../types';
 import { getRandomUserAgent } from '../utils/http';
 import { BaseResolver } from './base';
 
 export class DataNodesResolver implements BaseResolver {
   readonly name = 'DataNodes';
-  private fetchFn: typeof fetch;
+  private fetchFn: FetchFunction;
   private timeoutMs: number;
 
-  constructor(fetchFn: typeof fetch = fetch, timeoutMs: number = config.requestTimeoutMs) {
-    this.fetchFn = (input, init) => fetchFn(input, init);
+  constructor(fetchFn: FetchFunction = fetch, timeoutMs: number = config.requestTimeoutMs) {
+    this.fetchFn = fetchFn;
     this.timeoutMs = timeoutMs;
   }
   canResolve(url: string): boolean {
