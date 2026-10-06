@@ -109,6 +109,32 @@ app.get('/cache/clear', (c) => {
   return c.json({ status: 'ok', message: 'In-memory cache purged successfully' });
 });
 
+// Route: Health & VPS Diagnostics
+const serverStartTime = Date.now();
+app.get('/health', (c) => {
+  const uptimeSec = Math.floor((Date.now() - serverStartTime) / 1000);
+  const mem = typeof process !== 'undefined' && process.memoryUsage ? process.memoryUsage() : null;
+  const memoryMb = mem
+    ? {
+        rss: Math.round(mem.rss / (1024 * 1024)),
+        heapUsed: Math.round(mem.heapUsed / (1024 * 1024)),
+        heapTotal: Math.round(mem.heapTotal / (1024 * 1024)),
+      }
+    : undefined;
+
+  return c.json({
+    status: 'ok',
+    service: 'marlin-stream-addons',
+    version: manifest.version,
+    uptimeSec,
+    memoryMb,
+    providers: {
+      oppadrama: config.oppadramaEnabled,
+      nontonAnimeId: config.nontonAnimeIdEnabled,
+    },
+  });
+});
+
 function renderConfigPage(initialConfig = '') {
   return `<!DOCTYPE html>
 <html lang="id">
@@ -643,8 +669,9 @@ app.get('/', (c) => c.html(renderConfigPage()));
 app.get('/configure', (c) => c.html(renderConfigPage()));
 app.get('/:config/configure', (c) => c.html(renderConfigPage(c.req.param('config'))));
 
-// Dual export: works for Bun server (port + fetch) and Cloudflare Workers (fetch)
+// Dual export: works for Bun/Node server (hostname + port + fetch) and Cloudflare Workers (fetch)
 export default {
+  hostname: config.host,
   port: config.port,
   fetch: app.fetch,
 };

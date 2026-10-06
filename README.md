@@ -14,23 +14,55 @@ A lightweight, zero-bandwidth stream resolver addon for Stremio built with TypeS
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Local Development
 ```bash
 bun install
-bun run dev      # Local simulator via wrangler
-bun test         # Run unit test suite
+bun run start     # Run locally on http://localhost:7000
+bun test          # Run test suite
+bun run tunnel    # Optional: share to phone/TV via Cloudflare Quick Tunnel
 ```
 
-### Production Deployment (Cloudflare Workers)
+---
+
+## 🖥️ Production Deployment (VPS / Linux Server)
+
+### Option 1: Standalone Bun with Systemd (Recommended, ~50MB RAM)
+1. Copy template systemd service:
+   ```bash
+   sudo cp marlin-addon.service.example /etc/systemd/system/marlin-addon.service
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now marlin-addon
+   ```
+2. Check status and healthcheck:
+   ```bash
+   curl http://localhost:7000/health
+   ```
+
+### Option 2: Docker Compose (1-Click)
+```bash
+docker compose up -d
+```
+
+### Automatic HTTPS (Caddy + sslip.io)
+For official HTTPS without purchasing a domain, use Caddy with `sslip.io`:
+```caddy
+# /etc/caddy/Caddyfile
+YOUR_VPS_IP.sslip.io {
+    reverse_proxy 127.0.0.1:7000
+}
+```
+Restart Caddy: `sudo systemctl restart caddy`.
+Install manifest in Stremio: `https://YOUR_VPS_IP.sslip.io/manifest.json`.
+
+---
+
+## 📡 Cloudflare Workers (Serverless Alternative)
 ```bash
 bun run deploy
 ```
-Deploy the worker and install the generated manifest URL into Stremio:
-`https://<your-worker-subdomain>.workers.dev/manifest.json`
-
----
+*Note: Serverless Cloudflare Workers restricts direct subrequests to raw IP addresses (Oppadrama) and may trigger Cloudflare bot challenges.*
 
 ## 📜 License & Disclaimers
 

@@ -1,0 +1,24 @@
+[Unit]
+Description=Marlin Stream Stremio Addon Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/marlin-stream-addons
+ExecStart=/root/.bun/bin/bun run src/index.ts
+Restart=always
+RestartSec=5
+KillMode=process
+Environment=HOST=0.0.0.0
+Environment=PORT=7000
+Environment=PROVIDER_OPPADRAMA_ENABLED=true
+Environment=OPPADRAMA_BASE_URL=http://212.86.121.175
+Environment=PROVIDER_NONTONANIMEID_ENABLED=true
+Environment=NONTONANIMEID_BASE_URL=https://s13.nontonanimeid.boats
+Environment=REQUEST_TIMEOUT_MS=6000
+Environment=CACHE_STREAM_TTL=3600
+Environment=CACHE_META_TTL=86400
+
+[Install]
+WantedBy=multi-user.target

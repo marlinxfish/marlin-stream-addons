@@ -1,0 +1,14 @@
+# Template 1: Domain gratis sslip.io (Ganti YOUR_VPS_IP dengan IP publik VPS Anda)
+# YOUR_VPS_IP.sslip.io {
+#     reverse_proxy 127.0.0.1:7000
+# }
+
+# Template 2: Subdomain DuckDNS gratis (contoh: marlinstream.duckdns.org)
+# marlinstream.duckdns.org {
+#     reverse_proxy 127.0.0.1:7000
+# }
+
+# Template 3: Domain kustom pribadi
+# stream.yourdomain.com {
+#     reverse_proxy 127.0.0.1:7000
+# }

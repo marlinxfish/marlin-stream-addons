@@ -6,6 +6,9 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "tunnel": "bunx cloudflared tunnel --url http://localhost:7000",
+    "docker:build": "docker build -t marlin-stream-addon .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "bun test",

@@ -70,4 +70,19 @@ describe('Stremio Addon Definition', () => {
     const metaData = (await metaRes.json()) as { meta?: unknown };
     expect(metaData.meta).toBeDefined();
   });
+
+  it('provides /health endpoint with diagnostic status', async () => {
+    const res = await app.request('/health');
+    expect(res.status).toBe(200);
+    const data = (await res.json()) as {
+      status: string;
+      service: string;
+      uptimeSec: number;
+      providers: { oppadrama: boolean; nontonAnimeId: boolean };
+    };
+    expect(data.status).toBe('ok');
+    expect(data.service).toBe('marlin-stream-addons');
+    expect(typeof data.uptimeSec).toBe('number');
+    expect(data.providers).toBeDefined();
+  });
 });

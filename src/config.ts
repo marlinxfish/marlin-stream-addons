@@ -1,4 +1,5 @@
 export interface AppConfig {
+  host: string;
   port: number;
   oppadramaBaseUrl: string;
   oppadramaEnabled: boolean;
@@ -14,6 +15,7 @@ export interface AppConfig {
 
 export function loadConfig(env: Record<string, string | undefined> = process.env): AppConfig {
   return {
+    host: env.HOST || '0.0.0.0',
     port: Number(env.PORT) || 7000,
     oppadramaBaseUrl: (env.OPPADRAMA_BASE_URL || 'http://212.86.121.175').replace(/\/+$/, ''),
     oppadramaEnabled: env.PROVIDER_OPPADRAMA_ENABLED !== 'false',
