@@ -19,10 +19,10 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
   <style>
     :root {
       --bg: #05070e;
-      --card-bg: rgba(13, 18, 32, 0.78);
+      --card-bg: rgba(13, 18, 32, 0.85);
       --card-border: rgba(255, 255, 255, 0.08);
-      --inner-bg: rgba(18, 25, 44, 0.55);
-      --inner-border: rgba(255, 255, 255, 0.06);
+      --inner-bg: rgba(20, 27, 48, 0.6);
+      --inner-border: rgba(255, 255, 255, 0.07);
       --accent: #0ea5e9;
       --accent-hover: #38bdf8;
       --accent-glow: rgba(14, 165, 233, 0.3);
@@ -30,7 +30,6 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       --purple-glow: rgba(139, 92, 246, 0.25);
       --emerald: #10b981;
       --emerald-glow: rgba(16, 185, 129, 0.2);
-      --rose: #f43f5e;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --text-sub: #64748b;
@@ -61,18 +60,17 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       padding: 1rem;
       position: relative;
       background:
-        radial-gradient(800px circle at 50% 0%, rgba(14, 165, 233, 0.12), transparent 70%),
-        radial-gradient(600px circle at 85% 90%, rgba(139, 92, 246, 0.08), transparent 70%),
+        radial-gradient(900px circle at 50% 0%, rgba(14, 165, 233, 0.12), transparent 70%),
+        radial-gradient(700px circle at 85% 90%, rgba(139, 92, 246, 0.08), transparent 70%),
         #05070e;
     }
-
 
     /* Main Console Chassis */
     .console {
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 940px;
+      max-width: 980px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 20px;
@@ -89,7 +87,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     /* Console Top Header */
     .header {
-      padding: 0.9rem 1.4rem;
+      padding: 0.95rem 1.5rem;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
@@ -166,19 +164,20 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       box-shadow: 0 0 8px currentColor;
     }
 
-    /* Cockpit Body (2 Columns) */
+    /* Cockpit Body (2 Columns with optimal 1.15fr : 0.85fr ratio) */
     .cockpit {
-      padding: 1.25rem 1.4rem;
+      padding: 1.35rem 1.5rem;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
       align-items: stretch;
     }
 
     .col {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      justify-content: space-between;
+      gap: 0.95rem;
     }
 
     /* Section Component */
@@ -283,28 +282,29 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       box-shadow: 0 2px 8px var(--accent-glow);
     }
 
-    /* Toggle Switches in a clean card */
+    /* Toggle Switches - Clean, spacious row */
     .toggles-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
+      gap: 0.65rem;
     }
 
     .toggle-item {
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
       border-radius: 10px;
-      padding: 0.6rem 0.75rem;
+      padding: 0.6rem 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.5rem;
       cursor: pointer;
       user-select: none;
       transition: border-color 0.2s;
     }
 
     .toggle-item:hover {
-      border-color: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.15);
     }
 
     .toggle-label {
@@ -314,6 +314,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       display: flex;
       align-items: center;
       gap: 0.45rem;
+      white-space: nowrap;
     }
 
     .toggle-switch {
@@ -349,60 +350,95 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     input:checked + .toggle-slider { background: var(--accent); }
     input:checked + .toggle-slider::before { transform: translateX(14px); }
 
-    /* Sources list */
-    .sources-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
+    /* Sources list - Clean single-line items */
+    .sources-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
     }
 
-    .source-card {
+    .source-row {
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
       border-radius: 10px;
-      padding: 0.5rem 0.7rem;
+      padding: 0.55rem 0.85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .source-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .source-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .source-dot.on {
+      background: #34d399;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .source-dot.off {
+      background: #64748b;
     }
 
     .source-name {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--text);
+      white-space: nowrap;
     }
 
-    .source-meta {
-      font-size: 0.65rem;
+    .source-desc {
+      font-size: 0.68rem;
       color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .badge-on {
-      font-size: 0.62rem;
+    .source-pill-badge {
+      font-size: 0.65rem;
       font-weight: 600;
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .source-pill-badge.on {
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid rgba(16, 185, 129, 0.3);
       color: #34d399;
     }
 
-    .badge-off {
-      font-size: 0.62rem;
-      font-weight: 600;
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
+    .source-pill-badge.off {
       background: rgba(100, 116, 139, 0.15);
       border: 1px solid rgba(100, 116, 139, 0.25);
       color: var(--text-sub);
     }
 
     /* RIGHT COLUMN: ACTION DOCK */
+    .action-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+
     .action-box {
       background: linear-gradient(145deg, rgba(14, 165, 233, 0.1), rgba(139, 92, 246, 0.08));
       border: 1px solid rgba(14, 165, 233, 0.25);
       border-radius: 14px;
-      padding: 1.1rem;
+      padding: 1.15rem;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
@@ -415,7 +451,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     .action-title {
-      font-size: 0.85rem;
+      font-size: 0.86rem;
       font-weight: 700;
       color: var(--text);
     }
@@ -477,7 +513,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
       border-radius: 9px;
-      padding: 0.55rem 0.9rem;
+      padding: 0.6rem 0.9rem;
       font-size: 0.78rem;
       font-weight: 600;
       color: var(--text-muted);
@@ -516,10 +552,12 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       background: var(--inner-bg);
       border: 1px solid var(--inner-border);
       border-radius: 12px;
-      padding: 0.9rem;
+      padding: 1rem 1.1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.65rem;
+      flex: 1;
+      justify-content: center;
     }
 
     .steps-title {
@@ -541,8 +579,8 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     .step-num {
-      width: 17px;
-      height: 17px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: rgba(14, 165, 233, 0.15);
       border: 1px solid rgba(14, 165, 233, 0.3);
@@ -558,7 +596,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
 
     /* Footer */
     .footer {
-      padding: 0.6rem 1.4rem;
+      padding: 0.65rem 1.5rem;
       border-top: 1px solid var(--card-border);
       background: rgba(255, 255, 255, 0.01);
       display: flex;
@@ -567,13 +605,6 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       font-size: 0.68rem;
       color: var(--text-sub);
     }
-
-    .footer a {
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-
-    .footer a:hover { color: var(--accent); }
 
     /* Toast */
     .toast {
@@ -604,7 +635,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
     }
 
     /* Responsive Mobile Breakpoint */
-    @media (max-width: 780px) {
+    @media (max-width: 820px) {
       body { padding: 0.5rem; }
       .console { border-radius: 14px; max-height: 98dvh; }
       .header { padding: 0.65rem 0.9rem; }
@@ -618,7 +649,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
         overflow-y: auto;
       }
       .col { gap: 0.65rem; }
-      .sources-row { display: none; }
+      .sources-list { display: none; }
       .steps-card { display: none; }
       .action-box { padding: 0.85rem; gap: 0.6rem; }
       .btn-cta { padding: 0.75rem; font-size: 0.82rem; }
@@ -677,7 +708,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
               type="password"
               id="access-key-input"
               class="access-input"
-              placeholder="${isKeyRequired ? 'Masukkan Access Key keluarga...' : 'Opsional: Server terbuka untuk umum'}"
+              placeholder="${isKeyRequired ? 'Ketik sandi akses...' : 'Opsional (tanpa sandi)'}"
               oninput="setAccessKey(this.value)"
               autocomplete="off"
               spellcheck="false"
@@ -738,25 +769,27 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           </div>
         </div>
 
-        <!-- Active Sources -->
+        <!-- Active Sources (Clean Horizontal Rows) -->
         <div>
           <div class="section-title">Sumber Indexer Aktif</div>
-          <div class="sources-row">
-            <div class="source-card">
-              <div>
-                <div class="source-name">NontonAnimeID</div>
-                <div class="source-meta">Anime & Kitsu Sub Indo</div>
+          <div class="sources-list">
+            <div class="source-row">
+              <div class="source-left">
+                <span class="source-dot ${options.nontonAnimeIdEnabled ? 'on' : 'off'}"></span>
+                <span class="source-name">NontonAnimeID</span>
+                <span class="source-desc">• Anime & Kitsu</span>
               </div>
-              <span class="${options.nontonAnimeIdEnabled ? 'badge-on' : 'badge-off'}">
+              <span class="source-pill-badge ${options.nontonAnimeIdEnabled ? 'on' : 'off'}">
                 ${options.nontonAnimeIdEnabled ? 'Aktif' : 'Off'}
               </span>
             </div>
-            <div class="source-card">
-              <div>
-                <div class="source-name">Oppadrama</div>
-                <div class="source-meta">Drama & Movie Asia</div>
+            <div class="source-row">
+              <div class="source-left">
+                <span class="source-dot ${options.oppadramaEnabled ? 'on' : 'off'}"></span>
+                <span class="source-name">Oppadrama</span>
+                <span class="source-desc">• Drama & Film Asia</span>
               </div>
-              <span class="${options.oppadramaEnabled ? 'badge-on' : 'badge-off'}">
+              <span class="source-pill-badge ${options.oppadramaEnabled ? 'on' : 'off'}">
                 ${options.oppadramaEnabled ? 'Aktif' : 'Off'}
               </span>
             </div>
@@ -765,7 +798,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
       </div>
 
       <!-- Right Column: Stremio Action Card -->
-      <div class="col">
+      <div class="col action-panel">
         <div class="action-box">
           <div class="action-header">
             <span class="action-title">Aktivasi ke Stremio</span>
@@ -792,7 +825,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           <div id="url-preview" class="url-chip">Menyiapkan link manifest...</div>
         </div>
 
-        <!-- Quick Steps -->
+        <!-- Quick Steps (Tightly balanced) -->
         <div class="steps-card">
           <div class="steps-title">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
@@ -804,7 +837,7 @@ export function renderConfigPage(initialConfig = '', options: PortalOptions = {}
           </div>
           <div class="step-item">
             <span class="step-num">1</span>
-            <span><strong>Otomatis:</strong> Klik tombol biru di atas untuk membuka aplikasi Stremio langsung.</span>
+            <span><strong>Otomatis:</strong> Klik tombol di atas untuk sinkronisasi ke aplikasi Stremio langsung.</span>
           </div>
           <div class="step-item">
             <span class="step-num">2</span>
