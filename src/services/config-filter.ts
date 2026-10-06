@@ -1,6 +1,7 @@
 import type { StreamResult } from '../types';
 
 export interface UserConfigPayload {
+  key?: string;
   maxResolution?: '1080p' | '720p' | '480p';
   showSpeed?: boolean;
   showSize?: boolean;
@@ -15,7 +16,10 @@ export function decodeConfigParam(encoded?: unknown): UserConfigPayload | null {
       return JSON.parse(encoded) as UserConfigPayload;
     }
     const json = Buffer.from(encoded, 'base64url').toString('utf8');
-    return JSON.parse(json) as UserConfigPayload;
+    if (json.startsWith('{')) {
+      return JSON.parse(json) as UserConfigPayload;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -51,4 +55,12 @@ export function filterStreamsByConfig(
       }
       return { ...stream, title };
     });
+}
+
+export function isAccessKeyValid(rawConfig?: string, expectedKey?: string): boolean {
+  if (!expectedKey) return true;
+  if (!rawConfig) return false;
+  if (rawConfig === expectedKey) return true;
+  const parsed = decodeConfigParam(rawConfig);
+  return Boolean(parsed && parsed.key === expectedKey);
 }

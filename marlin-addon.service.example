@@ -19,6 +19,7 @@ Environment=NONTONANIMEID_BASE_URL=https://s13.nontonanimeid.boats
 Environment=REQUEST_TIMEOUT_MS=6000
 Environment=CACHE_STREAM_TTL=3600
 Environment=CACHE_META_TTL=86400
+# Environment=ACCESS_KEY=KeluargaMarlin2026
 
 [Install]
 WantedBy=multi-user.target

@@ -5,6 +5,7 @@ import { config } from './config';
 import { cacheService } from './services/cache';
 import { catalogService } from './services/catalog';
 import type { MediaType } from './types';
+import { isAccessKeyValid } from './services/config-filter';
 
 
 export const app = new Hono();
@@ -36,11 +37,25 @@ function parseSearchParam(extraParam?: string): string | undefined {
 }
 
 // Route: Manifest
-app.get('/manifest.json', (c) => c.json(manifest));
-app.get('/:config/manifest.json', (c) => c.json(manifest));
+app.get('/manifest.json', (c) => {
+  if (config.accessKey) {
+    return c.json({ error: 'Unauthorized: Access key required' }, 401);
+  }
+  return c.json(manifest);
+});
 
+app.get('/:config/manifest.json', (c) => {
+  const configParam = c.req.param('config');
+  if (config.accessKey && !isAccessKeyValid(configParam, config.accessKey)) {
+    return c.json({ error: 'Unauthorized: Invalid access key' }, 401);
+  }
+  return c.json(manifest);
+});
 // Route: Catalog (Browse & Search)
 app.get('/catalog/:type/:id/:extra?', async (c) => {
+  if (config.accessKey) {
+    return c.json({ error: 'Unauthorized: Access key required' }, 401);
+  }
   const type = c.req.param('type') as MediaType;
   const search = parseSearchParam(c.req.param('extra'));
   const metas = await catalogService.getCatalog(type, search);
@@ -48,6 +63,10 @@ app.get('/catalog/:type/:id/:extra?', async (c) => {
 });
 
 app.get('/:config/catalog/:type/:id/:extra?', async (c) => {
+  const configParam = c.req.param('config');
+  if (config.accessKey && !isAccessKeyValid(configParam, config.accessKey)) {
+    return c.json({ error: 'Unauthorized: Invalid access key' }, 401);
+  }
   const type = c.req.param('type') as MediaType;
   const search = parseSearchParam(c.req.param('extra'));
   const metas = await catalogService.getCatalog(type, search);
@@ -56,6 +75,9 @@ app.get('/:config/catalog/:type/:id/:extra?', async (c) => {
 
 // Route: Meta (Title & Episodes details)
 app.get('/meta/:type/:id', async (c) => {
+  if (config.accessKey) {
+    return c.json({ error: 'Unauthorized: Access key required' }, 401);
+  }
   const type = c.req.param('type') as MediaType;
   const rawId = c.req.param('id');
   const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
@@ -64,6 +86,10 @@ app.get('/meta/:type/:id', async (c) => {
 });
 
 app.get('/:config/meta/:type/:id', async (c) => {
+  const configParam = c.req.param('config');
+  if (config.accessKey && !isAccessKeyValid(configParam, config.accessKey)) {
+    return c.json({ error: 'Unauthorized: Invalid access key' }, 401);
+  }
   const type = c.req.param('type') as MediaType;
   const rawId = c.req.param('id');
   const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
@@ -73,6 +99,9 @@ app.get('/:config/meta/:type/:id', async (c) => {
 
 // Route: Streams
 app.get('/stream/:type/:id', async (c) => {
+  if (config.accessKey) {
+    return c.json({ streams: [], error: 'Unauthorized: Access key required' }, 401);
+  }
   const type = c.req.param('type') as MediaType;
   const rawId = c.req.param('id');
   const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
@@ -89,6 +118,9 @@ app.get('/stream/:type/:id', async (c) => {
 
 app.get('/:config/stream/:type/:id', async (c) => {
   const configParam = c.req.param('config');
+  if (config.accessKey && !isAccessKeyValid(configParam, config.accessKey)) {
+    return c.json({ streams: [], error: 'Unauthorized: Invalid access key' }, 401);
+  }
   const type = c.req.param('type') as MediaType;
   const rawId = c.req.param('id');
   const id = rawId.endsWith('.json') ? rawId.slice(0, -5) : rawId;
@@ -500,7 +532,21 @@ function renderConfigPage(initialConfig = '') {
         <div style="margin-top: 0.85rem; padding: 0.75rem 1rem; border-radius: 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.75rem; color: #34d399; display: flex; align-items: center; gap: 0.5rem;">
           <span>⚡</span>
           <span><strong>Server Otomatis:</strong> Semua server video (KotakVideo, Vidhide, dll) aktif otomatis dan siap diputar.</span>
+        <!-- Section 2: Access Key -->
+        <div class="section-title">🔑 Access Key / Sandi Akses</div>
+        <div style="margin-bottom: 1.25rem;">
+          <input
+            type="password"
+            id="access-key-input"
+            placeholder="${config.accessKey ? 'Masukkan Access Key...' : 'Opsional: Tidak ada kunci aktif'}"
+            oninput="setAccessKey(this.value)"
+            style="width: 100%; box-sizing: border-box; background: rgba(15, 20, 34, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 0.75rem; padding: 0.75rem 1rem; color: #fff; font-size: 0.9rem; outline: none;"
+          />
+          <div id="key-hint" style="font-size: 0.75rem; color: ${config.accessKey ? '#f87171' : '#9ca3af'}; margin-top: 0.4rem;">
+            ${config.accessKey ? '🔒 Access Key wajib diisi agar link addon dapat dipasang.' : '🔓 Server terbuka untuk umum (tidak memerlukan kunci).'}
+          </div>
         </div>
+
         <!-- Section 3: Resolution -->
         <div class="section-title">Batas Maksimal Resolusi</div>
         <div class="res-tabs">
@@ -575,12 +621,13 @@ function renderConfigPage(initialConfig = '') {
   <div id="toast" class="toast">Link manifest tersalin ke clipboard!</div>
 
   <script>
+    const requiresKey = ${Boolean(config.accessKey)};
     const state = {
+      key: '',
       maxResolution: '1080p',
       showSpeed: true,
       showSize: true,
     };
-
     // Parse initial config from query param or injected string
     (function init() {
       try {
@@ -589,10 +636,10 @@ function renderConfigPage(initialConfig = '') {
         if (cfgParam) {
           const json = atob(cfgParam.replace(/-/g, '+').replace(/_/g, '/'));
           const parsed = JSON.parse(json);
+          if (parsed.key) state.key = parsed.key;
           if (parsed.maxResolution) state.maxResolution = parsed.maxResolution;
           if (parsed.showSpeed !== undefined) state.showSpeed = parsed.showSpeed;
           if (parsed.showSize !== undefined) state.showSize = parsed.showSize;
-        }
       } catch (e) {}
 
       syncDom();
@@ -613,8 +660,14 @@ function renderConfigPage(initialConfig = '') {
 
       const sizeToggle = document.getElementById('toggle-size');
       if (sizeToggle) sizeToggle.checked = state.showSize;
+      const keyInput = document.getElementById('access-key-input');
+      if (keyInput && state.key) keyInput.value = state.key;
     }
 
+    function setAccessKey(val) {
+      state.key = val.trim();
+      updateManifest();
+    }
     function setResolution(res) {
       state.maxResolution = res;
       syncDom();
@@ -626,6 +679,18 @@ function renderConfigPage(initialConfig = '') {
     }
 
     function updateManifest() {
+      const btnInstall = document.getElementById('btn-install');
+      const urlPreview = document.getElementById('url-preview');
+      if (requiresKey && !state.key) {
+        btnInstall.style.opacity = '0.4';
+        btnInstall.style.pointerEvents = 'none';
+        urlPreview.innerText = '⚠️ Ketik Access Key di atas untuk mengaktifkan link addon.';
+        window.currentManifestUrl = '';
+        return;
+      }
+      btnInstall.style.opacity = '1';
+      btnInstall.style.pointerEvents = 'auto';
+
       const speedToggle = document.getElementById('toggle-speed');
       const sizeToggle = document.getElementById('toggle-size');
       if (speedToggle) state.showSpeed = speedToggle.checked;

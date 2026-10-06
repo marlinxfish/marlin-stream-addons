@@ -11,6 +11,7 @@ export interface AppConfig {
   proxyUrl?: string;
   addonName: string;
   addonIcon: string;
+  accessKey?: string;
 }
 
 export function loadConfig(env: Record<string, string | undefined> = process.env): AppConfig {
@@ -27,6 +28,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     proxyUrl: env.PROXY_URL || env.HTTP_PROXY || env.HTTPS_PROXY,
     addonName: env.ADDON_NAME || 'Marlin Stream',
     addonIcon: env.ADDON_ICON || '🐟',
+    accessKey: env.ACCESS_KEY && env.ACCESS_KEY.trim() ? env.ACCESS_KEY.trim() : undefined,
   };
 }
 

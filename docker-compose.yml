@@ -17,6 +17,7 @@ services:
       - REQUEST_TIMEOUT_MS=${REQUEST_TIMEOUT_MS:-6000}
       - CACHE_STREAM_TTL=${CACHE_STREAM_TTL:-3600}
       - CACHE_META_TTL=${CACHE_META_TTL:-86400}
+      - ACCESS_KEY=${ACCESS_KEY:-}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7000/health"]
       interval: 30s

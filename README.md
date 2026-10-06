@@ -52,8 +52,9 @@ Includes Caddy + Let's Encrypt SSL and Addon service in a single stack:
    ```bash
    docker compose up -d
    ```
-3. Install manifest in Stremio:
-   `https://<YOUR_VPS_IP>.sslip.io/manifest.json`
+3. Buka Portal Konfigurasi:
+   Kunjungi `https://<YOUR_VPS_IP>.sslip.io/configure` di browser untuk memilih resolusi dan memasukkan **Access Key** (jika diatur di `.env`).
+4. Klik **INSTALL ADDON** untuk memasang langsung ke Stremio.
 ---
 
 ## 📡 Cloudflare Workers (Serverless Alternative)
