@@ -40,22 +40,20 @@ bun run tunnel    # Optional: share to phone/TV via Cloudflare Quick Tunnel
    curl http://localhost:7000/health
    ```
 
-### Option 2: Docker Compose (1-Click)
-```bash
-docker compose up -d
-```
-
-### Automatic HTTPS (Caddy + sslip.io)
-For official HTTPS without purchasing a domain, use Caddy with `sslip.io`:
-```caddy
-# /etc/caddy/Caddyfile
-YOUR_VPS_IP.sslip.io {
-    reverse_proxy 127.0.0.1:7000
-}
-```
-Restart Caddy: `sudo systemctl restart caddy`.
-Install manifest in Stremio: `https://YOUR_VPS_IP.sslip.io/manifest.json`.
-
+### Option 2: Docker Compose with Auto-SSL (1-Command, Recommended)
+Includes Caddy + Let's Encrypt SSL and Addon service in a single stack:
+1. Copy environment configuration:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set DOMAIN=<YOUR_VPS_IP>.sslip.io
+   nano .env
+   ```
+2. Start all services:
+   ```bash
+   docker compose up -d
+   ```
+3. Install manifest in Stremio:
+   `https://<YOUR_VPS_IP>.sslip.io/manifest.json`
 ---
 
 ## 📡 Cloudflare Workers (Serverless Alternative)
